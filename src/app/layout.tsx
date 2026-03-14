@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import AnnouncementBar from "@/components/AnnouncementBar";
-import Navbar from "@/components/Navbar";
+import ConditionalAnnouncementBar from "@/components/ConditionalAnnouncementBar";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 import VercelAnalytics from "@/components/VercelAnalytics";
 
 const geistSans = Geist({
@@ -141,8 +141,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} min-h-screen bg-[#f7f6f3] text-[#37352f] antialiased`}
       >
-        <AnnouncementBar message="✨ Get honest feedback about your startup - Paste your URL now! ✨" />
-        <Navbar />
+        <ConditionalAnnouncementBar />
+        <ConditionalNavbar />
         {children}
         <VercelAnalytics />
       </body>

@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => {
@@ -25,7 +26,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="w-full bg-white/80 backdrop-blur-sm border-b border-[rgba(55,53,47,0.09)] sticky top-0 z-50" aria-label="Main navigation">
+    <nav className="w-full bg-white/95 backdrop-blur-sm border-b border-[rgba(55,53,47,0.09)] sticky top-0 z-[60]" aria-label="Main navigation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link
@@ -69,6 +70,7 @@ const Navbar: React.FC = () => {
 
         {/* Desktop CTA Button */}
         <button
+          onClick={() => router.push("/login")}
           className="hidden md:block bg-[#37352f] text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-[#2e2d29] transition-colors cursor-pointer"
           aria-label="Join SANDBOX"
         >
@@ -124,9 +126,12 @@ const Navbar: React.FC = () => {
             </li>
             <li className="pt-2 mt-2 border-t border-[rgba(55,53,47,0.09)]">
               <button
+                onClick={() => {
+                  router.push("/login");
+                  closeMobileMenu();
+                }}
                 className="w-full bg-[#37352f] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#2e2d29] transition-colors cursor-pointer"
                 aria-label="Join SANDBOX"
-                onClick={closeMobileMenu}
               >
                 JOIN
               </button>

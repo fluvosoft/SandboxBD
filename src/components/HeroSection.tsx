@@ -1,15 +1,39 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
 const HeroSection: React.FC = () => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle search logic here
-    console.log("Searching for:", searchQuery);
+    setError("");
+
+    if (!searchQuery.trim()) {
+      setError("Please enter a website URL");
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      const url = new URL(searchQuery.startsWith("http") ? searchQuery : `https://${searchQuery}`);
+      setIsLoading(true);
+
+      // Simulate API call - in real app, this would create/get feedback ID
+      setTimeout(() => {
+        setIsLoading(false);
+        // Generate a demo feedback ID (in real app, this comes from backend)
+        const feedbackId = Math.random().toString(36).substring(2, 11);
+        router.push(`/feedback/${feedbackId}`);
+      }, 500);
+    } catch {
+      setError("Please enter a valid website URL");
+    }
   };
 
   return (
@@ -30,7 +54,7 @@ const HeroSection: React.FC = () => {
 
         {/* Search Box */}
         <form
-          onSubmit={handleSearch}
+          onSubmit={handleSubmit}
           className="max-w-2xl mx-auto px-2"
           aria-label="Search for startup feedback"
         >
@@ -40,22 +64,40 @@ const HeroSection: React.FC = () => {
             </label>
             <input
               id="website-url-input"
-              type="url"
+              type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setError("");
+              }}
               placeholder="Enter your website URL and find out..."
               aria-label="Website URL"
               aria-describedby="search-description"
-              className="w-full px-4 sm:px-5 py-3.5 sm:py-4 pr-12 sm:pr-14 text-sm sm:text-base bg-white border border-[rgba(55,53,47,0.16)] rounded-md text-[#37352f] placeholder-[#9b9a97] focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[rgba(249,115,22,0.15)] transition-all shadow-sm"
+              className={`w-full px-4 sm:px-5 py-3.5 sm:py-4 pr-12 sm:pr-14 text-sm sm:text-base bg-white border rounded-md text-[#37352f] placeholder-[#9b9a97] focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                error
+                  ? "border-red-500 focus:border-red-500 focus:ring-[rgba(239,68,68,0.15)]"
+                  : "border-[rgba(55,53,47,0.16)] focus:border-[#f97316] focus:ring-[rgba(249,115,22,0.15)]"
+              }`}
+              disabled={isLoading}
             />
             <button
               type="submit"
+              disabled={isLoading}
               aria-label="Submit website URL for feedback"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#37352f] text-white rounded-md hover:bg-[#2e2d29] transition-colors focus:outline-none focus:ring-2 focus:ring-[rgba(55,53,47,0.2)]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#37352f] text-white rounded-md hover:bg-[#2e2d29] transition-colors focus:outline-none focus:ring-2 focus:ring-[rgba(55,53,47,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Search size={18} className="sm:w-5 sm:h-5" aria-hidden="true" />
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Search size={18} className="sm:w-5 sm:h-5" aria-hidden="true" />
+              )}
             </button>
           </div>
+          {error && (
+            <p className="mt-2 text-sm text-red-600 text-center" role="alert">
+              {error}
+            </p>
+          )}
           <p id="search-description" className="sr-only">
             Enter your startup website URL to receive honest feedback and reviews
           </p>

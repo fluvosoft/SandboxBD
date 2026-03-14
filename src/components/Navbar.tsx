@@ -1,11 +1,19 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-type NavbarProps = {
-  activeLink?: string;
-};
+const Navbar: React.FC = () => {
+  const pathname = usePathname();
 
-const Navbar: React.FC<NavbarProps> = ({ activeLink = "Browse" }) => {
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(path);
+  };
+
   return (
     <nav className="w-full bg-white" aria-label="Main navigation">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -22,26 +30,13 @@ const Navbar: React.FC<NavbarProps> = ({ activeLink = "Browse" }) => {
         <ul className="flex items-center gap-8 list-none">
           <li>
             <Link
-              href="/browse"
+              href="/"
               className={`font-medium text-slate-700 hover:text-slate-900 transition-colors ${
-                activeLink === "Browse"
+                isActive("/")
                   ? "text-slate-900 underline decoration-slate-900 underline-offset-4"
                   : ""
               }`}
-              aria-current={activeLink === "Browse" ? "page" : undefined}
-            >
-              Browse
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/get-feedback"
-              className={`font-medium text-slate-700 hover:text-slate-900 transition-colors ${
-                activeLink === "Get Feedback"
-                  ? "text-slate-900 underline decoration-slate-900 underline-offset-4"
-                  : ""
-              }`}
-              aria-current={activeLink === "Get Feedback" ? "page" : undefined}
+              aria-current={isActive("/") ? "page" : undefined}
             >
               Get Feedback
             </Link>
@@ -50,11 +45,11 @@ const Navbar: React.FC<NavbarProps> = ({ activeLink = "Browse" }) => {
             <Link
               href="/gallery"
               className={`font-medium text-slate-700 hover:text-slate-900 transition-colors ${
-                activeLink === "Gallery"
+                isActive("/gallery")
                   ? "text-slate-900 underline decoration-slate-900 underline-offset-4"
                   : ""
               }`}
-              aria-current={activeLink === "Gallery" ? "page" : undefined}
+              aria-current={isActive("/gallery") ? "page" : undefined}
             >
               Gallery
             </Link>

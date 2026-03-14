@@ -5,19 +5,19 @@ import CarouselSection from "@/components/CarouselSection";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Get Honest Startup Feedback - SANDBOX",
+  title: "Browse Startups - Get Honest Feedback",
   description:
-    "What do people really think about your startup? Get brutally honest feedback by pasting your website URL. No sugar-coating, just real insights from experienced entrepreneurs.",
+    "Browse innovative startups and get brutally honest feedback. Discover what people really think about startups. Paste your website URL for honest insights from experienced entrepreneurs.",
   openGraph: {
-    title: "Get Honest Startup Feedback - SANDBOX",
+    title: "Browse Startups - Get Honest Feedback | SANDBOX",
     description:
-      "What do people really think about your startup? Get brutally honest feedback by pasting your website URL.",
+      "Browse innovative startups and get brutally honest feedback. Discover what people really think.",
     url: "https://sandboxbd.com",
   },
   twitter: {
-    title: "Get Honest Startup Feedback - SANDBOX",
+    title: "Browse Startups - Get Honest Feedback",
     description:
-      "What do people really think about your startup? Get brutally honest feedback by pasting your website URL.",
+      "Browse innovative startups and get brutally honest feedback. Discover what people really think.",
   },
   alternates: {
     canonical: "https://sandboxbd.com",

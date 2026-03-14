@@ -21,7 +21,8 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
 }) => {
   return (
     <article
-      className="w-full max-w-[210mm] aspect-[210/297] bg-white border border-slate-300 shadow-lg rounded-sm p-8 md:p-12 flex flex-col hover:shadow-xl transition-shadow"
+      className="w-full max-w-[210mm] bg-white border border-slate-300 shadow-lg rounded-sm p-8 md:p-12 flex flex-col hover:shadow-xl transition-shadow h-full"
+      style={{ aspectRatio: "210/297" }}
       itemScope
       itemType="https://schema.org/Organization"
     >
@@ -65,7 +66,7 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
       </header>
 
       {/* Summary Section */}
-      <div className="flex-1 mb-8">
+      <div className="flex-1 mb-8 min-h-0">
         <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
           About
         </h3>

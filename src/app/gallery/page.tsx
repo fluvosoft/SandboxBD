@@ -151,7 +151,7 @@ const GalleryPage = () => {
           </header>
 
           {/* Grid Layout */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 items-stretch">
             {startups.map((startup, index) => (
               <A4PaperCard key={index} {...startup} />
             ))}

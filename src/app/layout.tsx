@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
+import VercelAnalytics from "@/components/VercelAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
         <AnnouncementBar message="✨ Looking for app inspiration? Check out SaaS Interface ✨" />
         <Navbar />
         {children}
+        <VercelAnalytics />
       </body>
     </html>
   );

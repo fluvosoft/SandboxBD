@@ -137,21 +137,21 @@ const GalleryPage = () => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="min-h-screen bg-slate-50 py-12 px-4 md:px-6">
+      <div className="min-h-screen bg-[#f7f6f3] py-8 sm:py-10 md:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
-          <header className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <header className="text-center mb-8 sm:mb-10 md:mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[#37352f] mb-3 sm:mb-4 px-2">
               Startup Gallery
             </h1>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-[#787774] max-w-2xl mx-auto px-2 leading-relaxed">
               Explore innovative startups that have been reviewed and added to our
               gallery. Each card represents a unique journey and vision.
             </p>
           </header>
 
           {/* Grid Layout */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 items-stretch">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 items-stretch">
             {startups.map((startup, index) => (
               <A4PaperCard key={index} {...startup} />
             ))}

@@ -3,18 +3,18 @@ import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-white py-16 px-6">
+    <footer className="w-full bg-[#f7f6f3] py-12 sm:py-14 md:py-16 px-4 sm:px-6 border-t border-[rgba(55,53,47,0.09)]">
       <div className="max-w-7xl mx-auto text-center">
-        <h2 className="text-6xl md:text-8xl font-bold bg-linear-to-r from-slate-900 to-blue-900 bg-clip-text text-transparent mb-6">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold text-[#37352f] mb-4 sm:mb-6">
           SANDBOX
         </h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-xs sm:text-sm text-[#787774] px-2">
           Copyright claim by{" "}
           <Link
             href="https://www.fluvoSoft.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-slate-900 hover:text-slate-700 underline transition-colors"
+            className="text-[#37352f] hover:text-[#f97316] underline transition-colors"
           >
             FluvoSoft
           </Link>

@@ -97,7 +97,7 @@ export const metadata: Metadata = {
     title: "SANDBOX",
   },
   other: {
-    "theme-color": "#0f172a",
+    "theme-color": "#37352f",
   },
 };
 
@@ -139,7 +139,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} min-h-screen bg-white text-slate-900`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} min-h-screen bg-[#f7f6f3] text-[#37352f] antialiased`}
       >
         <AnnouncementBar message="✨ Get honest feedback about your startup - Paste your URL now! ✨" />
         <Navbar />

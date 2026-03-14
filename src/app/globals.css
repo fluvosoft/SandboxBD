@@ -14,7 +14,7 @@ body {
 }
 
 .animate-announcement-flash {
-  animation: announcement-flash 1s linear infinite;
+  animation: announcement-flash 3s linear infinite;
 }
 
 @keyframes scroll-right {

@@ -141,7 +141,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} min-h-screen bg-white text-slate-900`}
       >
-        <AnnouncementBar message="✨ Looking for app inspiration? Check out SaaS Interface ✨" />
+        <AnnouncementBar message="✨ Get honest feedback about your startup - Paste your URL now! ✨" />
         <Navbar />
         {children}
         <VercelAnalytics />

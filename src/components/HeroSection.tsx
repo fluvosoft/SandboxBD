@@ -29,23 +29,36 @@ const HeroSection: React.FC = () => {
         </p>
 
         {/* Search Box */}
-        <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+        <form
+          onSubmit={handleSearch}
+          className="max-w-2xl mx-auto"
+          aria-label="Search for startup feedback"
+        >
           <div className="relative">
+            <label htmlFor="website-url-input" className="sr-only">
+              Enter your website URL to get feedback
+            </label>
             <input
-              type="text"
+              id="website-url-input"
+              type="url"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Enter your website URL and find out..."
+              aria-label="Website URL"
+              aria-describedby="search-description"
               className="w-full px-6 py-4 pr-14 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent shadow-sm transition-all"
             />
             <button
               type="submit"
-              aria-label="Search"
+              aria-label="Submit website URL for feedback"
               className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2"
             >
-              <Search size={20} />
+              <Search size={20} aria-hidden="true" />
             </button>
           </div>
+          <p id="search-description" className="sr-only">
+            Enter your startup website URL to receive honest feedback and reviews
+          </p>
         </form>
       </div>
     </section>

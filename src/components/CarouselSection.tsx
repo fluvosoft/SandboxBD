@@ -84,9 +84,12 @@ const CarouselSection: React.FC = () => {
   const duplicatedStartups = [...startups, ...startups];
 
   return (
-    <section className="w-full bg-white py-12 overflow-hidden">
+    <section
+      className="w-full bg-white py-12 overflow-hidden"
+      aria-label="Featured startups carousel"
+    >
       {/* First Row - Right to Left */}
-      <div className="mb-8">
+      <div className="mb-8" aria-hidden="true">
         <div className="flex gap-6 animate-scroll-right">
           {duplicatedStartups.map((startup, index) => (
             <StartupCard key={`row1-${index}`} {...startup} />
@@ -95,7 +98,7 @@ const CarouselSection: React.FC = () => {
       </div>
 
       {/* Second Row - Left to Right */}
-      <div>
+      <div aria-hidden="true">
         <div className="flex gap-6 animate-scroll-left">
           {duplicatedStartups.map((startup, index) => (
             <StartupCard key={`row2-${index}`} {...startup} />

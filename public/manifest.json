@@ -1,0 +1,24 @@
+{
+  "name": "SANDBOX - Startup Feedback Platform",
+  "short_name": "SANDBOX",
+  "description": "Get brutally honest feedback about your startup. Paste your website URL and receive real insights from experienced entrepreneurs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import A4PaperCard from "@/components/A4PaperCard";
 
 type Startup = {
@@ -8,6 +9,26 @@ type Startup = {
   visits: number;
   valuation: string;
   websiteUrl: string;
+};
+
+export const metadata: Metadata = {
+  title: "Startup Gallery - Browse Reviewed Startups",
+  description:
+    "Explore innovative startups that have been reviewed and added to our gallery. Discover unique journeys, valuations, and insights from the startup ecosystem.",
+  openGraph: {
+    title: "Startup Gallery - Browse Reviewed Startups | SANDBOX",
+    description:
+      "Explore innovative startups that have been reviewed and added to our gallery.",
+    url: "https://sandboxbd.com/gallery",
+  },
+  twitter: {
+    title: "Startup Gallery - Browse Reviewed Startups",
+    description:
+      "Explore innovative startups that have been reviewed and added to our gallery.",
+  },
+  alternates: {
+    canonical: "https://sandboxbd.com/gallery",
+  },
 };
 
 const GalleryPage = () => {
@@ -87,28 +108,57 @@ const GalleryPage = () => {
     },
   ];
 
-  return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 md:px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Startup Gallery
-          </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Explore innovative startups that have been reviewed and added to our
-            gallery. Each card represents a unique journey and vision.
-          </p>
-        </div>
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Startup Gallery",
+    description:
+      "Explore innovative startups that have been reviewed and added to our gallery",
+    url: "https://sandboxbd.com/gallery",
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: startups.length,
+      itemListElement: startups.map((startup, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Organization",
+          name: startup.name,
+          description: startup.summary,
+          url: startup.websiteUrl,
+        },
+      })),
+    },
+  };
 
-        {/* Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-          {startups.map((startup, index) => (
-            <A4PaperCard key={index} {...startup} />
-          ))}
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="min-h-screen bg-slate-50 py-12 px-4 md:px-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Page Header */}
+          <header className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+              Startup Gallery
+            </h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Explore innovative startups that have been reviewed and added to our
+              gallery. Each card represents a unique journey and vision.
+            </p>
+          </header>
+
+          {/* Grid Layout */}
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            {startups.map((startup, index) => (
+              <A4PaperCard key={index} {...startup} />
+            ))}
+          </section>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => {
@@ -38,8 +37,8 @@ const Navbar: React.FC = () => {
           SAND<span className="text-[#f97316]">-BO</span>X
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <ul className="hidden md:flex items-center gap-1 list-none">
+        {/* Desktop Navigation Links - Right Side */}
+        <ul className="hidden md:flex items-center gap-1 list-none ml-auto">
           <li>
             <Link
               href="/"
@@ -67,15 +66,6 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
         </ul>
-
-        {/* Desktop CTA Button */}
-        <button
-          onClick={() => router.push("/login")}
-          className="hidden md:block bg-[#37352f] text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-[#2e2d29] transition-colors cursor-pointer"
-          aria-label="Join SANDBOX"
-        >
-          JOIN
-        </button>
 
         {/* Mobile Menu Button */}
         <button
@@ -123,18 +113,6 @@ const Navbar: React.FC = () => {
               >
                 Gallery
               </Link>
-            </li>
-            <li className="pt-2 mt-2 border-t border-[rgba(55,53,47,0.09)]">
-              <button
-                onClick={() => {
-                  router.push("/login");
-                  closeMobileMenu();
-                }}
-                className="w-full bg-[#37352f] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#2e2d29] transition-colors cursor-pointer"
-                aria-label="Join SANDBOX"
-              >
-                JOIN
-              </button>
             </li>
           </ul>
         </div>

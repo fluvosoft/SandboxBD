@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { submitReview, saveReportToSession } from "@/lib/api";
 
 const HeroSection: React.FC = () => {
   const router = useRouter();
@@ -19,20 +21,29 @@ const HeroSection: React.FC = () => {
       return;
     }
 
-    // Basic URL validation
     try {
       const url = new URL(searchQuery.startsWith("http") ? searchQuery : `https://${searchQuery}`);
       setIsLoading(true);
 
-      // Simulate API call - in real app, this would create/get feedback ID
-      setTimeout(() => {
+      const result = await submitReview(url.toString());
+      if (!result.ok) {
+        setError(result.error || "Something went wrong. Please try again.");
         setIsLoading(false);
-        // Generate a demo feedback ID (in real app, this comes from backend)
-        const feedbackId = Math.random().toString(36).substring(2, 11);
-        router.push(`/feedback/${feedbackId}`);
-      }, 500);
-    } catch {
-      setError("Please enter a valid website URL");
+        return;
+      }
+      if (!result.report) {
+        setError("No report returned. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Use backend-generated ID for the report page URL
+      const feedbackId = result.report_id || Math.random().toString(36).substring(2, 11);
+      saveReportToSession(feedbackId, result.report);
+      router.push(`/feedback/${feedbackId}`);
+    } catch (err) {
+      setError("Could not reach the review service. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -56,7 +67,7 @@ const HeroSection: React.FC = () => {
         <form
           onSubmit={handleSubmit}
           className="max-w-2xl mx-auto px-2"
-          aria-label="Search for startup feedback"
+          aria-label="Submit website for startup feedback"
         >
           <div className="relative">
             <label htmlFor="website-url-input" className="sr-only">
@@ -70,9 +81,8 @@ const HeroSection: React.FC = () => {
                 setSearchQuery(e.target.value);
                 setError("");
               }}
-              placeholder="Enter your website URL and find out..."
+              placeholder="Enter your website URL..."
               aria-label="Website URL"
-              aria-describedby="search-description"
               className={`w-full px-4 sm:px-5 py-3.5 sm:py-4 pr-12 sm:pr-14 text-sm sm:text-base bg-white border rounded-md text-[#37352f] placeholder-[#9b9a97] focus:outline-none focus:ring-2 transition-all shadow-sm ${
                 error
                   ? "border-red-500 focus:border-red-500 focus:ring-[rgba(239,68,68,0.15)]"
@@ -94,12 +104,18 @@ const HeroSection: React.FC = () => {
             </button>
           </div>
           {error && (
-            <p className="mt-2 text-sm text-red-600 text-center" role="alert">
+            <p className="text-sm text-red-600 text-center" role="alert">
               {error}
             </p>
           )}
           <p id="search-description" className="sr-only">
-            Enter your startup website URL to receive honest feedback and reviews
+            Enter your startup website URL to receive an honest feedback report
+          </p>
+          <p className="mt-4 text-center text-sm text-[#787774]">
+            Already have a review?{" "}
+            <Link href="/feedback/view" className="text-[#f97316] hover:underline">
+              View by URL
+            </Link>
           </p>
         </form>
       </div>

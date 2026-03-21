@@ -87,12 +87,41 @@ export interface FeaturedCarouselItem {
   valuation: string;
 }
 
+/** In-memory cache so repeat visits / remounts don’t hammer `/api/review/featured`. */
+let featuredClientCache: {
+  baseKey: string;
+  items: FeaturedCarouselItem[];
+  at: number;
+} | null = null;
+
+const FEATURED_CLIENT_TTL_MS = 45_000;
+
+/** Call after a successful review so the carousel refetches (server cache is also revalidated). */
+export function clearFeaturedCarouselClientCache(): void {
+  featuredClientCache = null;
+}
+
 export async function getFeaturedCarouselItems(): Promise<FeaturedCarouselItem[]> {
+  const baseKey = getExternalApiBase() || "__same_origin__";
+  const now = Date.now();
+  if (
+    featuredClientCache &&
+    featuredClientCache.baseKey === baseKey &&
+    now - featuredClientCache.at < FEATURED_CLIENT_TTL_MS
+  ) {
+    return featuredClientCache.items;
+  }
+
   try {
-    const res = await fetch(reviewFeaturedUrl());
+    const res = await fetch(reviewFeaturedUrl(), {
+      method: "GET",
+      credentials: "same-origin",
+    });
     if (!res.ok) return [];
     const data = (await res.json()) as { items?: FeaturedCarouselItem[] };
-    return Array.isArray(data?.items) ? data.items : [];
+    const items = Array.isArray(data?.items) ? data.items : [];
+    featuredClientCache = { baseKey, items, at: Date.now() };
+    return items;
   } catch {
     return [];
   }

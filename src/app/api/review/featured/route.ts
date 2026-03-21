@@ -19,5 +19,13 @@ export async function GET(request: Request) {
   }
 
   const items = await getFeaturedReviewItems();
-  return NextResponse.json({ items });
+  return NextResponse.json(
+    { items },
+    {
+      headers: {
+        "Cache-Control":
+          "public, s-maxage=60, stale-while-revalidate=120, max-age=30",
+      },
+    }
+  );
 }

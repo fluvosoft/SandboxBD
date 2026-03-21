@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
-import { submitReview, saveReportToSession } from "@/lib/api";
+import {
+  clearFeaturedCarouselClientCache,
+  saveReportToSession,
+  submitReview,
+} from "@/lib/api";
 
 const HeroSection: React.FC = () => {
   const router = useRouter();
@@ -36,6 +40,10 @@ const HeroSection: React.FC = () => {
         setError("No report returned. Please try again.");
         setIsLoading(false);
         return;
+      }
+
+      if (!result.reusedToday) {
+        clearFeaturedCarouselClientCache();
       }
 
       // Use backend-generated ID for the report page URL

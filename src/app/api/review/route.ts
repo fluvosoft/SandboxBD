@@ -79,21 +79,13 @@ export async function POST(request: Request) {
   try {
     db = getReviewsFirestore();
   } catch (e) {
-    const hint =
-      process.env.NODE_ENV === "development" && e instanceof Error
-        ? e.message
-        : "Server configuration error";
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          hint +
-          (process.env.NODE_ENV === "development"
-            ? " — add FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY to .env (service account JSON from Firebase Console)."
-            : ""),
-      },
-      { status: 503 }
-    );
+    const msg = e instanceof Error ? e.message : "Server configuration error";
+    console.error("[api/review] Firestore init:", msg);
+    const error =
+      process.env.NODE_ENV === "development"
+        ? `${msg} — For production, set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_* in your host (e.g. Vercel → Settings → Environment Variables) and redeploy.`
+        : `${msg} If you are the site owner: add Firebase Admin credentials to the deployment environment and redeploy.`;
+    return NextResponse.json({ ok: false, error }, { status: 503 });
   }
 
   const ref = db.collection(REVIEWS_COLLECTION).doc(reportId);

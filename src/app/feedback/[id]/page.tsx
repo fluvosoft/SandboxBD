@@ -19,12 +19,14 @@ import {
   Target,
 } from "lucide-react";
 import { getReportFromSession, getReportById, getReportByURL, isOpenLetter, isVCRoast, type ReviewReport } from "@/lib/api";
+import { sanitizeLetterPlainText } from "@/lib/letter-format";
 
 const FeedbackPage = () => {
   const params = useParams();
   const searchParams = useSearchParams();
   const feedbackId = (params?.id as string) ?? "";
   const urlQuery = searchParams?.get("url") ?? "";
+  const dailyLimitNotice = searchParams?.get("daily") === "1";
   const [report, setReport] = useState<ReviewReport | null | "loading">("loading");
   const [viewByUrlInput, setViewByUrlInput] = useState("");
   const [viewByUrlLoading, setViewByUrlLoading] = useState(false);
@@ -121,9 +123,25 @@ const FeedbackPage = () => {
 
     // Open letter layout: single long-form letter, no section cards
     if (isOpenLetter(report)) {
+      const letterBody = sanitizeLetterPlainText(report.letter || "");
+      let hostLabel = report.url;
+      try {
+        hostLabel = new URL(report.url).hostname;
+      } catch {
+        /* keep url */
+      }
+
       return (
         <div className="min-h-screen bg-[#f7f6f3]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            {dailyLimitNotice && (
+              <p
+                className="mb-4 rounded-md border border-[rgba(55,53,47,0.16)] bg-white px-4 py-3 text-sm text-[#37352f]"
+                role="status"
+              >
+                This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC) — showing your existing report.
+              </p>
+            )}
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-sm text-[#787774] hover:text-[#37352f] mb-6 transition-colors"
@@ -132,24 +150,36 @@ const FeedbackPage = () => {
               Back to home
             </Link>
 
-            <div className="mb-8">
-              <h1 className="text-2xl sm:text-3xl font-semibold text-[#37352f] mb-2">
-                {title}
-              </h1>
-              <a
-                href={report.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-[#f97316] hover:text-[#ea580c] text-sm font-medium transition-colors"
-              >
-                {report.url}
-                <ExternalLink size={14} aria-hidden="true" />
-              </a>
-            </div>
-
-            <article className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 sm:p-10">
-              <div className="prose prose-neutral max-w-none text-[#37352f] text-[15px] leading-relaxed whitespace-pre-wrap">
-                {report.letter}
+            <article
+              className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] overflow-hidden"
+              aria-label="Review letter"
+            >
+              <div className="border-b border-[rgba(55,53,47,0.09)] bg-[#fafafa] px-6 sm:px-8 py-4 sm:py-5 text-sm text-[#37352f] space-y-1.5">
+                <div>
+                  <span className="text-[#787774] w-20 inline-block">From</span>
+                  <span className="font-medium">SANDBOX Review</span>
+                </div>
+                <div>
+                  <span className="text-[#787774] w-20 inline-block">Subject</span>
+                  <span className="font-medium">{title}</span>
+                </div>
+                <div>
+                  <span className="text-[#787774] w-20 inline-block">Re</span>
+                  <a
+                    href={report.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#f97316] hover:text-[#ea580c] font-medium inline-flex items-center gap-1.5"
+                  >
+                    {hostLabel}
+                    <ExternalLink size={12} aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+              <div className="px-6 sm:px-8 py-8 sm:py-10">
+                <div className="text-[#37352f] text-[15px] leading-[1.75] whitespace-pre-wrap font-serif">
+                  {letterBody}
+                </div>
               </div>
             </article>
           </div>
@@ -162,6 +192,14 @@ const FeedbackPage = () => {
       return (
         <div className="min-h-screen bg-[#f7f6f3]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            {dailyLimitNotice && (
+              <p
+                className="mb-4 rounded-md border border-[rgba(55,53,47,0.16)] bg-white px-4 py-3 text-sm text-[#37352f]"
+                role="status"
+              >
+                This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC) — showing your existing report.
+              </p>
+            )}
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-sm text-[#787774] hover:text-[#37352f] mb-6 transition-colors"
@@ -281,6 +319,14 @@ const FeedbackPage = () => {
     return (
       <div className="min-h-screen bg-[#f7f6f3]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          {dailyLimitNotice && (
+            <p
+              className="mb-4 rounded-md border border-[rgba(55,53,47,0.16)] bg-white px-4 py-3 text-sm text-[#37352f]"
+              role="status"
+            >
+              This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC) — showing your existing report.
+            </p>
+          )}
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-sm text-[#787774] hover:text-[#37352f] mb-6 transition-colors"

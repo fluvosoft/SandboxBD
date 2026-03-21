@@ -4,6 +4,7 @@ import "./globals.css";
 import ConditionalAnnouncementBar from "@/components/ConditionalAnnouncementBar";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import VercelAnalytics from "@/components/VercelAnalytics";
+import FirebaseAnalytics from "@/components/FirebaseAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -145,6 +146,7 @@ export default function RootLayout({
         <ConditionalNavbar />
         {children}
         <VercelAnalytics />
+        <FirebaseAnalytics />
       </body>
     </html>
   );

@@ -11,6 +11,7 @@ const HeroSection: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [honeypot, setHoneypot] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +26,7 @@ const HeroSection: React.FC = () => {
       const url = new URL(searchQuery.startsWith("http") ? searchQuery : `https://${searchQuery}`);
       setIsLoading(true);
 
-      const result = await submitReview(url.toString());
+      const result = await submitReview(url.toString(), honeypot);
       if (!result.ok) {
         setError(result.error || "Something went wrong. Please try again.");
         setIsLoading(false);
@@ -40,7 +41,8 @@ const HeroSection: React.FC = () => {
       // Use backend-generated ID for the report page URL
       const feedbackId = result.report_id || Math.random().toString(36).substring(2, 11);
       saveReportToSession(feedbackId, result.report);
-      router.push(`/feedback/${feedbackId}`);
+      const q = result.reusedToday ? "?daily=1" : "";
+      router.push(`/feedback/${feedbackId}${q}`);
     } catch (err) {
       setError("Could not reach the review service. Please try again.");
       setIsLoading(false);
@@ -69,6 +71,17 @@ const HeroSection: React.FC = () => {
           className="max-w-2xl mx-auto px-2"
           aria-label="Submit website for startup feedback"
         >
+          {/* Honeypot: leave empty; automated clients often fill hidden fields */}
+          <input
+            type="text"
+            name="company"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            className="absolute opacity-0 pointer-events-none w-px h-px overflow-hidden -z-10"
+          />
           <div className="relative">
             <label htmlFor="website-url-input" className="sr-only">
               Enter your website URL to get feedback

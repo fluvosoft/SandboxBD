@@ -44,22 +44,40 @@ export interface ReviewResponse {
   report?: ReviewReport;
   report_id?: string;
   report_url?: string;
+  reusedToday?: boolean;
+  message?: string;
   error?: string;
 }
 
-const getBaseUrl = (): string => {
-  if (typeof window !== "undefined") {
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-  }
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+/** Legacy external API base, or empty to use this app's `/api/review` routes. */
+const getExternalApiBase = (): string => {
+  return (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 };
 
-export async function submitReview(url: string): Promise<ReviewResponse> {
-  const base = getBaseUrl();
-  const res = await fetch(`${base}/review`, {
+function reviewPostUrl(): string {
+  const ext = getExternalApiBase();
+  return ext ? `${ext}/review` : "/api/review";
+}
+
+function reviewGetByIdUrl(id: string): string {
+  const ext = getExternalApiBase();
+  return ext ? `${ext}/review/${encodeURIComponent(id)}` : `/api/review/${encodeURIComponent(id)}`;
+}
+
+function reviewGetByUrlQuery(url: string): string {
+  const ext = getExternalApiBase();
+  const q = `url=${encodeURIComponent(url)}`;
+  return ext ? `${ext}/review/by-url?${q}` : `/api/review/by-url?${q}`;
+}
+
+export async function submitReview(
+  url: string,
+  trapField = ""
+): Promise<ReviewResponse> {
+  const res = await fetch(reviewPostUrl(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ url, _trap: trapField }),
   });
   const data = await res.json();
   if (!res.ok) {
@@ -70,8 +88,7 @@ export async function submitReview(url: string): Promise<ReviewResponse> {
 
 /** Fetches a stored report by ID (e.g. when user opens the link from email). */
 export async function getReportById(id: string): Promise<ReviewReport | null> {
-  const base = getBaseUrl();
-  const res = await fetch(`${base}/review/${encodeURIComponent(id)}`);
+  const res = await fetch(reviewGetByIdUrl(id));
   if (!res.ok) return null;
   const data = await res.json();
   return data?.report ?? null;
@@ -79,8 +96,7 @@ export async function getReportById(id: string): Promise<ReviewReport | null> {
 
 /** Fetches the latest stored report by website URL (for search / paste link). */
 export async function getReportByURL(url: string): Promise<ReviewReport | null> {
-  const base = getBaseUrl();
-  const res = await fetch(`${base}/review/by-url?url=${encodeURIComponent(url)}`);
+  const res = await fetch(reviewGetByUrlQuery(url));
   if (!res.ok) return null;
   const data = await res.json();
   return data?.report ?? null;

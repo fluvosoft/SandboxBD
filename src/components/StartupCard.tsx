@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 type StartupCardProps = {
   logo?: string;
@@ -7,6 +8,8 @@ type StartupCardProps = {
   summary: string;
   visits: number;
   valuation: string;
+  /** When set, the whole card links to this path (e.g. `/feedback/{id}`). */
+  href?: string;
 };
 
 const StartupCard: React.FC<StartupCardProps> = ({
@@ -15,9 +18,10 @@ const StartupCard: React.FC<StartupCardProps> = ({
   summary,
   visits,
   valuation,
+  href,
 }) => {
-  return (
-    <article className="flex-shrink-0 w-64 sm:w-72 md:w-80 bg-white border border-[rgba(55,53,47,0.16)] rounded-md p-4 sm:p-5 md:p-6 hover:shadow-md transition-all cursor-pointer">
+  const inner = (
+    <article className="h-full bg-white border border-[rgba(55,53,47,0.16)] rounded-md p-4 sm:p-5 md:p-6 hover:shadow-md transition-all cursor-pointer">
       {/* Logo and Name */}
       <header className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-[rgba(55,53,47,0.08)] flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -59,6 +63,19 @@ const StartupCard: React.FC<StartupCardProps> = ({
       </dl>
     </article>
   );
+
+  const wrapClass =
+    "shrink-0 w-64 sm:w-72 md:w-80 rounded-md focus-within:ring-2 focus-within:ring-[rgba(249,115,22,0.35)] focus-within:ring-offset-2 focus-within:ring-offset-[#f7f6f3]";
+
+  if (href) {
+    return (
+      <Link href={href} className={`${wrapClass} block no-underline text-inherit`}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return <div className={wrapClass}>{inner}</div>;
 };
 
 export default StartupCard;

@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { ReviewReport } from "@/lib/api";
 import { sanitizeLetterPlainText } from "@/lib/letter-format";
+import { normalizeReportTitle } from "@/lib/report-title";
 
 const SYSTEM = `You are an experienced angel investor writing a candid but professional memo to a founder.
 
@@ -13,7 +14,7 @@ Tone: direct, sharp where needed, always constructive. No hate, slurs, or person
 Respond with a single JSON object only (no markdown fences), matching this shape:
 {
   "url": string (echo the canonical URL given),
-  "title": string (one-line email subject style, e.g. "Quick thoughts on [hostname]"),
+  "title": string (the inferred company or product brand name only: 1–5 words, Title Case or natural brand casing, e.g. "Notion", "Linear", "Acme Labs". Do NOT use the raw domain, do NOT use questions, do NOT write "Thoughts on…" or "Feedback on…" — only the name you infer from the URL),
   "letter": string (full plain-text body only: include greeting such as "Hello," or "Hi there," body paragraphs, and a professional sign-off such as "Best regards," then a closing line like "— Sandbox Review")
 }`;
 
@@ -63,16 +64,8 @@ export async function generateStartupRoastReport(
   }
   const letter = sanitizeLetterPlainText(rawLetter);
 
-  const title =
-    typeof o.title === "string" && o.title.trim()
-      ? o.title.trim()
-      : (() => {
-          try {
-            return new URL(canonicalUrl).hostname;
-          } catch {
-            return "Startup review";
-          }
-        })();
+  const rawTitle = typeof o.title === "string" ? o.title.trim() : "";
+  const title = normalizeReportTitle(rawTitle || undefined, canonicalUrl);
 
   const report: ReviewReport = {
     url: canonicalUrl,

@@ -70,6 +70,34 @@ function reviewGetByUrlQuery(url: string): string {
   return ext ? `${ext}/review/by-url?${q}` : `/api/review/by-url?${q}`;
 }
 
+function reviewFeaturedUrl(): string {
+  const ext = getExternalApiBase();
+  return ext ? `${ext}/review/featured` : "/api/review/featured";
+}
+
+/** Public carousel payload from Firestore-backed reviews. */
+export interface FeaturedCarouselItem {
+  id: string;
+  url: string;
+  name: string;
+  summary: string;
+  /** Longer excerpt for gallery / detail cards */
+  summaryLong: string;
+  visits: number;
+  valuation: string;
+}
+
+export async function getFeaturedCarouselItems(): Promise<FeaturedCarouselItem[]> {
+  try {
+    const res = await fetch(reviewFeaturedUrl());
+    if (!res.ok) return [];
+    const data = (await res.json()) as { items?: FeaturedCarouselItem[] };
+    return Array.isArray(data?.items) ? data.items : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function submitReview(
   url: string,
   trapField = ""

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ReviewReport } from "@/lib/api";
 import { getReviewsFirestore, REVIEWS_COLLECTION } from "@/lib/firebase-admin";
+import { reportWithNormalizedTitle } from "@/lib/report-title";
 import { clientIpFromRequest, rateLimit } from "@/lib/rate-limit";
 import {
   assertPublicWebsiteUrl,
@@ -58,5 +59,7 @@ export async function GET(request: Request) {
   }
 
   const data = snap.data() as StoredDoc;
-  return NextResponse.json({ report: data.report });
+  return NextResponse.json({
+    report: reportWithNormalizedTitle(data.report, data.url),
+  });
 }

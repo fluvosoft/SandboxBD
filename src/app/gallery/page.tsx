@@ -2,130 +2,55 @@ import React from "react";
 import type { Metadata } from "next";
 import A4PaperCard from "@/components/A4PaperCard";
 
-type Startup = {
-  logo?: string;
-  name: string;
-  summary: string;
-  visits: number;
-  valuation: string;
-  websiteUrl: string;
-};
+export const dynamic = "force-dynamic";
+import {
+  DEMO_STARTUP_RECORDS,
+  mergeGalleryRows,
+} from "@/lib/demo-startups";
+import { getFeaturedReviewItems } from "@/lib/featured-reviews";
 
 export const metadata: Metadata = {
   title: "Startup Gallery - Browse Reviewed Startups",
   description:
-    "Explore innovative startups that have been reviewed and added to our gallery. Discover unique journeys, valuations, and insights from the startup ecosystem.",
+    "Explore startups reviewed on SANDBOX alongside well-known companies for context — real reviews from the community plus curated examples.",
   openGraph: {
     title: "Startup Gallery - Browse Reviewed Startups | SANDBOX",
     description:
-      "Explore innovative startups that have been reviewed and added to our gallery.",
+      "Explore startups reviewed on SANDBOX and curated company examples.",
     url: "https://sandboxbd.com/gallery",
   },
   twitter: {
     title: "Startup Gallery - Browse Reviewed Startups",
     description:
-      "Explore innovative startups that have been reviewed and added to our gallery.",
+      "Explore startups reviewed on SANDBOX and curated company examples.",
   },
   alternates: {
     canonical: "https://sandboxbd.com/gallery",
   },
 };
 
-const GalleryPage = () => {
-  // Sample data - replace with actual data from API/database
-  const startups: Startup[] = [
-    {
-      logo: "",
-      name: "TechFlow",
-      summary:
-        "Revolutionary project management tool that helps teams collaborate seamlessly. Built with cutting-edge technology to streamline workflows and boost productivity. Our platform integrates seamlessly with your existing tools and provides real-time insights into your team's performance.",
-      visits: 12500,
-      valuation: "$2.5M",
-      websiteUrl: "https://techflow.example.com",
-    },
-    {
-      logo: "",
-      name: "DataSync",
-      summary:
-        "AI-powered data synchronization platform for modern businesses. Transform how you manage and sync data across multiple platforms with intelligent automation. Our solution ensures data consistency and reduces manual work by up to 80%.",
-      visits: 8900,
-      valuation: "$1.8M",
-      websiteUrl: "https://datasync.example.com",
-    },
-    {
-      logo: "",
-      name: "CloudVault",
-      summary:
-        "Secure cloud storage solution with enterprise-grade encryption. Protect your sensitive data with military-grade security while enjoying seamless access from anywhere. Trusted by over 10,000 businesses worldwide.",
-      visits: 15200,
-      valuation: "$3.2M",
-      websiteUrl: "https://cloudvault.example.com",
-    },
-    {
-      logo: "",
-      name: "CodeCraft",
-      summary:
-        "Developer tools platform that streamlines the coding workflow. From code review to deployment, CodeCraft provides everything developers need to build better software faster. Join thousands of developers who have transformed their workflow.",
-      visits: 9800,
-      valuation: "$2.1M",
-      websiteUrl: "https://codecraft.example.com",
-    },
-    {
-      logo: "",
-      name: "MarketPulse",
-      summary:
-        "Real-time market analytics platform for traders and investors. Get instant insights into market trends, analyze patterns, and make data-driven investment decisions. Our advanced algorithms help you stay ahead of the market.",
-      visits: 11200,
-      valuation: "$2.9M",
-      websiteUrl: "https://marketpulse.example.com",
-    },
-    {
-      logo: "",
-      name: "DesignHub",
-      summary:
-        "Collaborative design platform for creative teams and agencies. Bring your design team together with powerful collaboration tools, version control, and seamless handoff capabilities. Create stunning designs faster than ever.",
-      visits: 7600,
-      valuation: "$1.5M",
-      websiteUrl: "https://designhub.example.com",
-    },
-    {
-      logo: "",
-      name: "FinanceWise",
-      summary:
-        "Personal finance management app with smart budgeting features. Take control of your finances with intelligent spending insights, automated savings, and comprehensive financial planning tools. Your path to financial freedom starts here.",
-      visits: 13400,
-      valuation: "$2.7M",
-      websiteUrl: "https://financewise.example.com",
-    },
-    {
-      logo: "",
-      name: "HealthTrack",
-      summary:
-        "Comprehensive health monitoring platform for individuals and clinics. Track your health metrics, manage medical records, and connect with healthcare providers seamlessly. Empowering better health decisions through technology.",
-      visits: 10100,
-      valuation: "$2.3M",
-      websiteUrl: "https://healthtrack.example.com",
-    },
-  ];
+const GalleryPage = async () => {
+  const liveItems = await getFeaturedReviewItems();
+  const rows = mergeGalleryRows(liveItems, DEMO_STARTUP_RECORDS);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Startup Gallery",
     description:
-      "Explore innovative startups that have been reviewed and added to our gallery",
+      "Startups reviewed on SANDBOX and curated technology company examples.",
     url: "https://sandboxbd.com/gallery",
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: startups.length,
-      itemListElement: startups.map((startup, index) => ({
+      numberOfItems: rows.length,
+      itemListElement: rows.map((row, index) => ({
         "@type": "ListItem",
         position: index + 1,
         item: {
           "@type": "Organization",
-          name: startup.name,
-          description: startup.summary,
-          url: startup.websiteUrl,
+          name: row.name,
+          description: row.summary.slice(0, 280),
+          url: row.websiteUrl,
         },
       })),
     },
@@ -139,21 +64,28 @@ const GalleryPage = () => {
       />
       <div className="min-h-screen bg-[#f7f6f3] py-8 sm:py-10 md:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
           <header className="text-center mb-8 sm:mb-10 md:mb-12">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[#37352f] mb-3 sm:mb-4 px-2">
               Startup Gallery
             </h1>
             <p className="text-base sm:text-lg text-[#787774] max-w-2xl mx-auto px-2 leading-relaxed">
-              Explore innovative startups that have been reviewed and added to our
-              gallery. Each card represents a unique journey and vision.
+              Sites reviewed on SANDBOX appear first; well-known technology
+              companies are shown as contextual examples where they don&apos;t
+              duplicate a live review.
             </p>
           </header>
 
-          {/* Grid Layout */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 items-stretch">
-            {startups.map((startup, index) => (
-              <A4PaperCard key={index} {...startup} />
+            {rows.map((row) => (
+              <A4PaperCard
+                key={row.key}
+                name={row.name}
+                summary={row.summary}
+                visits={row.visits}
+                valuation={row.valuation}
+                websiteUrl={row.websiteUrl}
+                feedbackHref={row.feedbackHref}
+              />
             ))}
           </section>
         </div>

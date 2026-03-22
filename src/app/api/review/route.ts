@@ -82,11 +82,10 @@ export async function POST(request: Request) {
     db = getReviewsFirestore();
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Server configuration error";
-    console.error("[api/review] Firestore init:", msg);
     const error =
       process.env.NODE_ENV === "development"
-        ? `${msg} — For production, set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_* in your host (e.g. Vercel → Settings → Environment Variables) and redeploy.`
-        : `${msg} If you are the site owner: add Firebase Admin credentials to the deployment environment and redeploy.`;
+        ? `${msg}. For production, set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_* in your host (e.g. Vercel → Settings → Environment Variables) and redeploy.`
+        : `${msg}. If you are the site owner: add Firebase Admin credentials to the deployment environment and redeploy.`;
     return NextResponse.json({ ok: false, error }, { status: 503 });
   }
 
@@ -103,7 +102,7 @@ export async function POST(request: Request) {
         report: data.report,
         reusedToday: true,
         message:
-          "This website was already analyzed today. Here is your report — one fresh analysis per URL per day.",
+          "This website was already analyzed today. Here is your report; one fresh analysis per URL per day.",
       });
     }
   }

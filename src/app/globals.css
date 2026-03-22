@@ -14,6 +14,10 @@ body {
   margin: 0;
   background-color: var(--notion-bg-gray);
   color: var(--notion-text);
+  font-family: var(--font-pixelify-sans), ui-monospace, monospace;
+  /* Crisp pixel-font rendering (avoid blurred subpixel smoothing). */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
 @keyframes announcement-flash {

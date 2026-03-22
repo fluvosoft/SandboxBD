@@ -82,7 +82,7 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
         </div>
       </header>
 
-      {/* Summary — natural height; no fixed A4 aspect (that caused overlap on long copy) */}
+      {/* Summary: natural height; no fixed A4 aspect (that caused overlap on long copy) */}
       <div className="shrink-0 mb-6 sm:mb-8">
         <h3 className="text-xs sm:text-sm font-medium text-[#9b9a97] uppercase tracking-wide mb-2 sm:mb-3">
           About

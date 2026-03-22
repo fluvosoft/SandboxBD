@@ -208,7 +208,7 @@ const FeedbackPage = () => {
                 className="mb-4 rounded-md border border-[rgba(55,53,47,0.16)] bg-white px-4 py-3 text-sm text-[#37352f]"
                 role="status"
               >
-                This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC) — showing your existing report.
+                This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC), showing your existing report.
               </p>
             )}
             <Link
@@ -257,7 +257,7 @@ const FeedbackPage = () => {
                 )}
               </div>
               <div className="px-6 sm:px-8 py-8 sm:py-10">
-                <div className="text-[#37352f] text-[15px] leading-[1.75] whitespace-pre-wrap font-serif">
+                <div className="text-[#37352f] text-[15px] leading-[1.75] whitespace-pre-wrap">
                   {letterBody}
                 </div>
               </div>
@@ -277,7 +277,7 @@ const FeedbackPage = () => {
                 className="mb-4 rounded-md border border-[rgba(55,53,47,0.16)] bg-white px-4 py-3 text-sm text-[#37352f]"
                 role="status"
               >
-                This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC) — showing your existing report.
+                This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC), showing your existing report.
               </p>
             )}
             <Link
@@ -414,7 +414,7 @@ const FeedbackPage = () => {
               className="mb-4 rounded-md border border-[rgba(55,53,47,0.16)] bg-white px-4 py-3 text-sm text-[#37352f]"
               role="status"
             >
-              This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC) — showing your existing report.
+              This website was already analyzed today. One fresh AI analysis per URL per calendar day (UTC), showing your existing report.
             </p>
           )}
           <Link

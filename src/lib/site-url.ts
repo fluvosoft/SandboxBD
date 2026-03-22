@@ -75,3 +75,19 @@ export function siteKeyFromCanonicalUrl(canonicalUrl: string): string {
 export function utcCalendarDay(d = new Date()): string {
   return d.toISOString().slice(0, 10);
 }
+
+/**
+ * Canonical site origin for metadata, sitemap, and JSON-LD.
+ * Set NEXT_PUBLIC_SITE_URL in production (no trailing slash), e.g. https://sandboxbd.com
+ */
+export function getSiteUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel) return `https://${vercel.replace(/\/$/, "")}`;
+  if (process.env.NODE_ENV === "development") {
+    const port = process.env.PORT || "3000";
+    return `http://localhost:${port}`;
+  }
+  return "https://sandboxbd.com";
+}

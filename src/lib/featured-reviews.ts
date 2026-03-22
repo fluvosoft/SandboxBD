@@ -67,8 +67,7 @@ const getCachedFeaturedReviewItems = unstable_cache(
 export async function getFeaturedReviewItems(): Promise<FeaturedCarouselItem[]> {
   try {
     return await getCachedFeaturedReviewItems();
-  } catch (e) {
-    console.error("[getFeaturedReviewItems]", e);
+  } catch {
     return [];
   }
 }

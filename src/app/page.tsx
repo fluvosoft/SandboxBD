@@ -3,24 +3,27 @@ import type { Metadata } from "next";
 import HeroSection from "@/components/HeroSection";
 import CarouselSection from "@/components/CarouselSection";
 import Footer from "@/components/Footer";
+import { getSiteUrl } from "@/lib/site-url";
+
+const siteUrl = getSiteUrl();
+
+const homeDescription =
+  "Looking for startup Bangladesh insights or a Sandbox BD-style review? SANDBOX (Sanbox) gives honest startup feedback, a live gallery, and URL-based reports for founders in Bangladesh and worldwide.";
 
 export const metadata: Metadata = {
-  title: "Browse Startups - Get Honest Feedback",
-  description:
-    "Browse innovative startups and get brutally honest feedback. Discover what people really think about startups. Paste your website URL for honest insights from experienced entrepreneurs.",
+  title: "Startup Bangladesh reviews & honest feedback | SANDBOX",
+  description: homeDescription,
   openGraph: {
-    title: "Browse Startups - Get Honest Feedback | SANDBOX",
-    description:
-      "Browse innovative startups and get brutally honest feedback. Discover what people really think.",
-    url: "https://sandboxbd.com",
+    title: "Startup Bangladesh reviews & honest feedback | SANDBOX",
+    description: homeDescription,
+    url: siteUrl,
   },
   twitter: {
-    title: "Browse Startups - Get Honest Feedback",
-    description:
-      "Browse innovative startups and get brutally honest feedback. Discover what people really think.",
+    title: "Startup Bangladesh reviews & honest feedback | SANDBOX",
+    description: homeDescription,
   },
   alternates: {
-    canonical: "https://sandboxbd.com",
+    canonical: siteUrl,
   },
 };
 
@@ -28,15 +31,18 @@ const page = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "SANDBOX - Get Honest Startup Feedback",
-    description:
-      "Get brutally honest feedback about your startup. Paste your website URL and receive real insights.",
-    url: "https://sandboxbd.com",
+    name: "SANDBOX - startup feedback & reviews (Bangladesh & global)",
+    description: homeDescription,
+    url: siteUrl,
+    isPartOf: { "@id": `${siteUrl}/#website` },
     mainEntity: {
       "@type": "Service",
-      serviceType: "Startup Feedback Platform",
+      name: "Startup feedback and reviews",
+      serviceType: "Startup feedback platform",
+      areaServed: ["Bangladesh", "Worldwide"],
       description:
-        "Platform for startups to receive honest feedback and reviews from experienced entrepreneurs",
+        "Honest startup reviews and feedback for Bangladesh founders and global startups; browse the gallery or submit your website URL.",
+      provider: { "@id": `${siteUrl}/#organization` },
     },
   };
 

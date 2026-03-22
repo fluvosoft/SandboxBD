@@ -1,42 +1,47 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import ConditionalAnnouncementBar from "@/components/ConditionalAnnouncementBar";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import FirebaseAnalytics from "@/components/FirebaseAnalytics";
+import { getSiteUrl } from "@/lib/site-url";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const siteUrl = getSiteUrl();
+const defaultDescription =
+  "SANDBOX (Sandbox BD, Sanbox) is a startup feedback platform for Bangladesh and global founders: honest reviews, a public startup gallery, and URL-based insights, with no sugar-coating.";
+
+const pixelifySans = Pixelify_Sans({
+  variable: "--font-pixelify-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair-display",
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-});
+/** Bump this when you replace `public/sandbox-bd-startup-feedback-icon.png` (favicons cache very hard). */
+const FAVICON_HREF = "/sandbox-bd-startup-feedback-icon.png?v=3";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://sandboxbd.com"), // Update with your actual domain
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "SANDBOX - Get Honest Startup Feedback & Reviews",
+    default:
+      "SANDBOX - Startup Bangladesh reviews, feedback & gallery | Sandbox BD",
     template: "%s | SANDBOX",
   },
-  description:
-    "Get brutally honest feedback about your startup. Paste your website URL and receive real insights from experienced entrepreneurs. Browse our gallery of reviewed startups and discover what people really think.",
+  description: defaultDescription,
   keywords: [
+    "startup bangladesh",
+    "startup",
+    "sanbox",
+    "sandbox bd",
+    "sandboxbd",
     "startup feedback",
     "startup review",
     "startup feedback platform",
     "honest startup reviews",
     "startup validation",
     "startup gallery",
+    "bangladesh startup",
+    "dhaka startup",
     "entrepreneur feedback",
     "startup critique",
     "business feedback",
@@ -59,30 +64,28 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://sandboxbd.com", // Update with your actual domain
+    url: siteUrl,
     siteName: "SANDBOX",
-    title: "SANDBOX - Get Honest Startup Feedback & Reviews",
-    description:
-      "Get brutally honest feedback about your startup. Paste your website URL and receive real insights from experienced entrepreneurs.",
+    title: "SANDBOX - Startup feedback & reviews (Bangladesh & global)",
+    description: defaultDescription,
     images: [
       {
-        url: "/og-image.png", // You'll need to create this image
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "SANDBOX - Startup Feedback Platform",
+        alt: "SANDBOX - startup feedback and reviews (Sandbox BD)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SANDBOX - Get Honest Startup Feedback & Reviews",
-    description:
-      "Get brutally honest feedback about your startup. Paste your website URL and receive real insights.",
-    images: ["/og-image.png"], // You'll need to create this image
-    creator: "@sandboxbd", // Update with your Twitter handle
+    title: "SANDBOX - Startup feedback & reviews | Sandbox BD",
+    description: defaultDescription,
+    images: ["/og-image.png"],
+    creator: "@sandboxbd",
   },
   alternates: {
-    canonical: "https://sandboxbd.com", // Update with your actual domain
+    canonical: siteUrl,
   },
   verification: {
     // Add your verification codes here when available
@@ -109,38 +112,56 @@ export default function RootLayout({
 }>) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "SANDBOX",
-    description:
-      "Get brutally honest feedback about your startup. Paste your website URL and receive real insights from experienced entrepreneurs.",
-    url: "https://sandboxbd.com", // Update with your actual domain
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: "https://sandboxbd.com/search?q={search_term_string}",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: "SANDBOX",
+        alternateName: ["Sandbox BD", "Sanbox", "sandboxbd", "SANDBOX BD"],
+        description: defaultDescription,
+        inLanguage: "en",
+        publisher: { "@id": `${siteUrl}/#organization` },
       },
-      "query-input": "required name=search_term_string",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "FluvoSoft",
-      url: "https://www.fluvoSoft.com",
-    },
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "FluvoSoft",
+        url: "https://www.fluvoSoft.com",
+        brand: { "@type": "Brand", name: "SANDBOX" },
+      },
+      {
+        "@type": "WebApplication",
+        "@id": `${siteUrl}/#webapp`,
+        name: "SANDBOX",
+        alternateName: ["Sandbox BD", "Sanbox"],
+        url: siteUrl,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Any",
+        description: defaultDescription,
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+        },
+        browserRequirements: "Requires JavaScript",
+      },
+    ],
   };
 
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href={FAVICON_HREF} type="image/png" />
+        <link rel="apple-touch-icon" href={FAVICON_HREF} />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/favicon.ico" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} min-h-screen bg-[#f7f6f3] text-[#37352f] antialiased`}
+        className={`${pixelifySans.variable} min-h-screen bg-[#f7f6f3] text-[#37352f]`}
       >
         <ConditionalAnnouncementBar />
         <ConditionalNavbar />

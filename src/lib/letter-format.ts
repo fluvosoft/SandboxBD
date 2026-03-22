@@ -19,7 +19,7 @@ export function sanitizeLetterPlainText(input: string): string {
   s = s.replace(/^\s*[-*+]\s+/gm, "• ");
   s = s.replace(/^\s*\d+\.\s+/gm, "");
 
-  // Any remaining asterisks (e.g. broken markdown) — letters must not show *
+  // Any remaining asterisks (e.g. broken markdown); letters must not show *
   s = s.replace(/\*/g, "");
 
   return s

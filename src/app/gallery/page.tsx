@@ -1,31 +1,35 @@
 import React from "react";
 import type { Metadata } from "next";
 import A4PaperCard from "@/components/A4PaperCard";
-
-export const dynamic = "force-dynamic";
 import {
   DEMO_STARTUP_RECORDS,
   mergeGalleryRows,
 } from "@/lib/demo-startups";
 import { getFeaturedReviewItems } from "@/lib/featured-reviews";
+import { getSiteUrl } from "@/lib/site-url";
+
+export const dynamic = "force-dynamic";
+
+const siteUrl = getSiteUrl();
+const galleryUrl = `${siteUrl}/gallery`;
+
+const galleryDescription =
+  "Browse reviewed startups on SANDBOX (Sandbox BD): real community reviews plus curated examples, ideal if you care about startup Bangladesh discovery and honest comparisons.";
 
 export const metadata: Metadata = {
-  title: "Startup Gallery - Browse Reviewed Startups",
-  description:
-    "Explore startups reviewed on SANDBOX alongside well-known companies for context — real reviews from the community plus curated examples.",
+  title: "Startup gallery - reviewed companies | SANDBOX (Sandbox BD)",
+  description: galleryDescription,
   openGraph: {
-    title: "Startup Gallery - Browse Reviewed Startups | SANDBOX",
-    description:
-      "Explore startups reviewed on SANDBOX and curated company examples.",
-    url: "https://sandboxbd.com/gallery",
+    title: "Startup gallery - reviewed companies | SANDBOX",
+    description: galleryDescription,
+    url: galleryUrl,
   },
   twitter: {
-    title: "Startup Gallery - Browse Reviewed Startups",
-    description:
-      "Explore startups reviewed on SANDBOX and curated company examples.",
+    title: "Startup gallery - reviewed companies | SANDBOX",
+    description: galleryDescription,
   },
   alternates: {
-    canonical: "https://sandboxbd.com/gallery",
+    canonical: galleryUrl,
   },
 };
 
@@ -36,10 +40,9 @@ const GalleryPage = async () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Startup Gallery",
-    description:
-      "Startups reviewed on SANDBOX and curated technology company examples.",
-    url: "https://sandboxbd.com/gallery",
+    name: "Startup gallery - SANDBOX (Sandbox BD)",
+    description: galleryDescription,
+    url: galleryUrl,
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: rows.length,
@@ -69,7 +72,8 @@ const GalleryPage = async () => {
               Startup Gallery
             </h1>
             <p className="text-base sm:text-lg text-[#787774] max-w-2xl mx-auto px-2 leading-relaxed">
-              Sites reviewed on SANDBOX appear first; well-known technology
+              Sites reviewed on SANDBOX (Sandbox BD) appear first. Great for
+              exploring startups in Bangladesh and beyond. Well-known technology
               companies are shown as contextual examples where they don&apos;t
               duplicate a live review.
             </p>

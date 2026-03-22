@@ -108,7 +108,7 @@ export const DEMO_STARTUP_RECORDS: DemoStartupRecord[] = [
     name: "Cursor",
     shortSummary: "AI-native code editor built for pair-programming with models.",
     longSummary:
-      "Cursor is a fork of VS Code–style editing with integrated AI for autocomplete, chat, and refactors. Developers use it to write and navigate code faster with model assistance.",
+      "Cursor is a fork of VS Code-style editing with integrated AI for autocomplete, chat, and refactors. Developers use it to write and navigate code faster with model assistance.",
     websiteUrl: "https://cursor.com",
     visits: 11000000,
     valuation: "Privately held",

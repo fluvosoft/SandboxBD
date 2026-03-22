@@ -79,7 +79,6 @@ export function getAdminApp(): App {
     cred = loadCredentialFromEnv();
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Invalid Firebase credentials";
-    console.error("[firebase-admin]", msg);
     throw new Error(msg);
   }
 
@@ -91,9 +90,7 @@ export function getAdminApp(): App {
         privateKey: cred.privateKey,
       }),
     });
-  } catch (e) {
-    const detail = e instanceof Error ? e.message : String(e);
-    console.error("[firebase-admin] initializeApp failed:", detail);
+  } catch {
     throw new Error(
       "Firebase Admin could not start (invalid key or credential). Check server env vars."
     );

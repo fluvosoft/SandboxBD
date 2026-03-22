@@ -51,7 +51,7 @@ const HeroSection: React.FC = () => {
       saveReportToSession(feedbackId, result.report);
       const q = result.reusedToday ? "?daily=1" : "";
       router.push(`/feedback/${feedbackId}${q}`);
-    } catch (err) {
+    } catch {
       setError("Could not reach the review service. Please try again.");
       setIsLoading(false);
     }
@@ -62,15 +62,16 @@ const HeroSection: React.FC = () => {
       <div className="max-w-4xl mx-auto text-center">
         {/* Heading */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[#37352f] mb-4 sm:mb-6 px-2 leading-tight">
-          What do people really think about your startup?
+          What do people really think about your{" "}
+          <span className="text-[#f97316]">startup</span>?
         </h1>
 
         {/* Description */}
         <p className="text-base sm:text-lg text-[#787774] mb-10 sm:mb-12 max-w-2xl mx-auto px-2 leading-relaxed">
-          Stop wondering. Paste your website and get brutally honest feedback
-          that actually helps you improve. No sugar-coating, no BS&apos;just real
-          insights from people who&apos;ve been there. Ready to see what you&apos;re
-          missing?
+          Built for founders everywhere, including the Bangladesh startup
+          community. SANDBOX (Sandbox BD) turns your URL into blunt, useful
+          feedback. No sugar-coating, no BS, just real insights from people
+          who&apos;ve been there. Ready to see what you&apos;re missing?
         </p>
 
         {/* Search Box */}

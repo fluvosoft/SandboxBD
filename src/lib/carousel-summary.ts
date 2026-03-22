@@ -26,7 +26,7 @@ export function summaryFromReport(report: ReviewReport, maxLen: number): string 
   if (report.startup_claim?.trim()) {
     return truncateWords(report.startup_claim, maxLen);
   }
-  return "Honest AI feedback is on file — open the card to read the full review.";
+  return "Honest AI feedback is on file. Open the card to read the full review.";
 }
 
 export function summaryForCarouselCard(report: ReviewReport): string {

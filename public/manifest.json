@@ -1,7 +1,21 @@
 {
   "name": "SANDBOX - Startup Feedback Platform",
   "short_name": "SANDBOX",
-  "description": "Get brutally honest feedback about your startup. Paste your website URL and receive real insights from experienced entrepreneurs.",
+  "description": "SANDBOX (Sandbox BD / Sanbox): honest startup feedback and reviews for Bangladesh and global founders. Paste your URL or browse the startup gallery.",
+  "icons": [
+    {
+      "src": "/sandbox-bd-startup-feedback-icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/sandbox-bd-startup-feedback-icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f6f3",

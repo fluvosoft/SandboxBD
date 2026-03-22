@@ -30,7 +30,7 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <Link
           href="/"
-          className="font-[var(--font-playfair-display)] font-semibold text-[#37352f] text-lg sm:text-xl hover:opacity-70 transition-opacity"
+          className="font-semibold text-[#37352f] text-lg sm:text-xl hover:opacity-70 transition-opacity"
           aria-label="SANDBOX Home"
           onClick={closeMobileMenu}
         >

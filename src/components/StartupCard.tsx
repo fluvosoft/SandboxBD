@@ -51,7 +51,7 @@ const StartupCard: React.FC<StartupCardProps> = ({
       {/* Stats */}
       <dl className="flex items-center justify-between pt-3 sm:pt-4 border-t border-[rgba(55,53,47,0.09)]">
         <div className="flex flex-col">
-          <dt className="text-xs text-[#9b9a97]">Visits</dt>
+            <dt className="text-xs text-[#9b9a97]">Views</dt>
           <dd className="text-xs sm:text-sm font-medium text-[#37352f]">
             {visits.toLocaleString()}
           </dd>

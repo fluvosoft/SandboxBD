@@ -10,6 +10,7 @@ type StoredDoc = {
   url: string;
   report: ReviewReport;
   lastAnalyzedDay: string;
+  viewCount?: number;
 };
 
 export async function GET(
@@ -46,7 +47,12 @@ export async function GET(
   }
 
   const data = snap.data() as StoredDoc;
+  const viewCount =
+    typeof data.viewCount === "number" && Number.isFinite(data.viewCount)
+      ? Math.max(0, Math.floor(data.viewCount))
+      : 0;
   return NextResponse.json({
     report: reportWithNormalizedTitle(data.report, data.url),
+    viewCount,
   });
 }

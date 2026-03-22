@@ -64,6 +64,12 @@ function reviewGetByIdUrl(id: string): string {
   return ext ? `${ext}/review/${encodeURIComponent(id)}` : `/api/review/${encodeURIComponent(id)}`;
 }
 
+function reviewViewPostUrl(id: string): string {
+  const ext = getExternalApiBase();
+  const enc = encodeURIComponent(id);
+  return ext ? `${ext}/review/${enc}/view` : `/api/review/${enc}/view`;
+}
+
 function reviewGetByUrlQuery(url: string): string {
   const ext = getExternalApiBase();
   const q = `url=${encodeURIComponent(url)}`;
@@ -143,20 +149,72 @@ export async function submitReview(
   return data as ReviewResponse;
 }
 
+export type ReportFetchResult = {
+  report: ReviewReport;
+  viewCount: number;
+  /** Present when loaded via by-url; use for view counting. */
+  reportId?: string;
+};
+
+function parseViewCount(data: { viewCount?: unknown }): number {
+  const v = data.viewCount;
+  if (typeof v === "number" && Number.isFinite(v)) return Math.max(0, Math.floor(v));
+  return 0;
+}
+
 /** Fetches a stored report by ID (e.g. when user opens the link from email). */
-export async function getReportById(id: string): Promise<ReviewReport | null> {
+export async function getReportById(
+  id: string
+): Promise<ReportFetchResult | null> {
   const res = await fetch(reviewGetByIdUrl(id));
   if (!res.ok) return null;
-  const data = await res.json();
-  return data?.report ?? null;
+  const data = (await res.json()) as { report?: ReviewReport };
+  if (!data?.report) return null;
+  return {
+    report: data.report,
+    viewCount: parseViewCount(data as { viewCount?: unknown }),
+  };
 }
 
 /** Fetches the latest stored report by website URL (for search / paste link). */
-export async function getReportByURL(url: string): Promise<ReviewReport | null> {
+export async function getReportByURL(
+  url: string
+): Promise<ReportFetchResult | null> {
   const res = await fetch(reviewGetByUrlQuery(url));
   if (!res.ok) return null;
-  const data = await res.json();
-  return data?.report ?? null;
+  const data = (await res.json()) as {
+    report?: ReviewReport;
+    report_id?: string;
+  };
+  if (!data?.report) return null;
+  return {
+    report: data.report,
+    viewCount: parseViewCount(data as { viewCount?: unknown }),
+    reportId: typeof data.report_id === "string" ? data.report_id : undefined,
+  };
+}
+
+/** Records one page view (server increments Firestore). Returns new total or null. */
+export async function recordReviewView(id: string): Promise<number | null> {
+  try {
+    const res = await fetch(reviewViewPostUrl(id), {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    const data = (await res.json().catch(() => null)) as {
+      viewCount?: unknown;
+    } | null;
+    const v = data?.viewCount;
+    const n =
+      typeof v === "number" && Number.isFinite(v)
+        ? Math.max(0, Math.floor(v))
+        : null;
+    if (res.ok && n != null) return n;
+    if (res.status === 429 && n != null) return n;
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export const FEEDBACK_STORAGE_PREFIX = "sandbox_feedback_";

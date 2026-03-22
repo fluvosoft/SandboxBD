@@ -103,7 +103,7 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
         <dl className="grid grid-cols-2 gap-4 sm:gap-6">
           <div>
             <dt className="text-xs font-medium text-[#9b9a97] uppercase tracking-wide mb-1.5 sm:mb-2">
-              Total Visits
+              Total views
             </dt>
             <dd className="text-xl sm:text-2xl font-semibold text-[#37352f]">
               {visits.toLocaleString()}

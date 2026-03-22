@@ -17,9 +17,24 @@ import {
   AlertTriangle,
   Users,
   Target,
+  Eye,
 } from "lucide-react";
-import { getReportFromSession, getReportById, getReportByURL, isOpenLetter, isVCRoast, type ReviewReport } from "@/lib/api";
+import {
+  getReportFromSession,
+  getReportById,
+  getReportByURL,
+  isOpenLetter,
+  isVCRoast,
+  recordReviewView,
+  type ReviewReport,
+} from "@/lib/api";
 import { sanitizeLetterPlainText } from "@/lib/letter-format";
+
+/** Prevents duplicate view POSTs when React Strict Mode runs effects twice (dev). */
+const recordingViewLock = new Set<string>();
+/** Dedupes React Strict Mode double-mount and same-tick double effects (~2.5s). */
+const recentViewPostAt = new Map<string, number>();
+const VIEW_POST_DEDUP_MS = 2500;
 
 const FeedbackPage = () => {
   const params = useParams();
@@ -28,26 +43,80 @@ const FeedbackPage = () => {
   const urlQuery = searchParams?.get("url") ?? "";
   const dailyLimitNotice = searchParams?.get("daily") === "1";
   const [report, setReport] = useState<ReviewReport | null | "loading">("loading");
+  const [viewCount, setViewCount] = useState<number | null>(null);
+  const [resolvedReviewId, setResolvedReviewId] = useState<string | null>(null);
   const [viewByUrlInput, setViewByUrlInput] = useState("");
   const [viewByUrlLoading, setViewByUrlLoading] = useState(false);
   const [viewByUrlError, setViewByUrlError] = useState("");
 
   useEffect(() => {
+    setViewCount(null);
+    setResolvedReviewId(null);
+
     if (urlQuery) {
-      getReportByURL(urlQuery).then((fetched) => setReport(fetched ?? null));
+      void getReportByURL(urlQuery).then((fetched) => {
+        if (fetched) {
+          setReport(fetched.report);
+          setViewCount(fetched.viewCount);
+          setResolvedReviewId(fetched.reportId ?? null);
+        } else {
+          setReport(null);
+        }
+      });
       return;
     }
     const stored = getReportFromSession(feedbackId);
     if (stored) {
       setReport(stored);
+      setResolvedReviewId(feedbackId || null);
       return;
     }
     if (!feedbackId) {
       setReport(null);
       return;
     }
-    getReportById(feedbackId).then((fetched) => setReport(fetched ?? null));
+    void getReportById(feedbackId).then((fetched) => {
+      if (fetched) {
+        setReport(fetched.report);
+        setViewCount(fetched.viewCount);
+        setResolvedReviewId(feedbackId);
+      } else {
+        setReport(null);
+      }
+    });
   }, [feedbackId, urlQuery]);
+
+  useEffect(() => {
+    if (report === "loading" || report === null) return;
+    const id = resolvedReviewId;
+    if (!id || !/^[a-f0-9]{16,64}$/i.test(id)) return;
+    if (typeof window === "undefined") return;
+
+    const now = Date.now();
+    const last = recentViewPostAt.get(id) ?? 0;
+    if (now - last < VIEW_POST_DEDUP_MS) {
+      void getReportById(id).then((meta) => {
+        if (meta) setViewCount(meta.viewCount);
+      });
+      return;
+    }
+    recentViewPostAt.set(id, now);
+
+    if (recordingViewLock.has(id)) return;
+    recordingViewLock.add(id);
+
+    void (async () => {
+      try {
+        const meta = await getReportById(id);
+        if (meta) setViewCount(meta.viewCount);
+        const n = await recordReviewView(id);
+        if (n != null) setViewCount(n);
+        else void getReportById(id).then((m) => m && setViewCount(m.viewCount));
+      } finally {
+        recordingViewLock.delete(id);
+      }
+    })();
+  }, [report, resolvedReviewId]);
 
   // Demo data for direct visits / no report in session
   const demoData = {
@@ -175,6 +244,17 @@ const FeedbackPage = () => {
                     <ExternalLink size={12} aria-hidden="true" />
                   </a>
                 </div>
+                {resolvedReviewId && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="text-[#787774] w-20 inline-block shrink-0">
+                      Views
+                    </span>
+                    <span className="font-medium tabular-nums text-[#37352f] inline-flex items-center gap-1.5">
+                      <Eye size={14} className="text-[#9b9a97]" aria-hidden />
+                      {viewCount === null ? "…" : viewCount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="px-6 sm:px-8 py-8 sm:py-10">
                 <div className="text-[#37352f] text-[15px] leading-[1.75] whitespace-pre-wrap font-serif">
@@ -222,6 +302,16 @@ const FeedbackPage = () => {
                   {report.url}
                   <ExternalLink size={14} aria-hidden="true" />
                 </a>
+                {resolvedReviewId && (
+                  <p className="mt-3 flex items-center gap-2 text-sm text-[#787774]">
+                    <Eye size={16} className="text-[#9b9a97] shrink-0" aria-hidden />
+                    <span className="tabular-nums text-[#37352f] font-medium">
+                      {viewCount === null
+                        ? "…"
+                        : `${viewCount.toLocaleString()} view${viewCount === 1 ? "" : "s"}`}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -349,6 +439,16 @@ const FeedbackPage = () => {
                 {report.url}
                 <ExternalLink size={14} aria-hidden="true" />
               </a>
+              {resolvedReviewId && (
+                <p className="mt-3 flex items-center gap-2 text-sm text-[#787774]">
+                  <Eye size={16} className="text-[#9b9a97] shrink-0" aria-hidden />
+                  <span className="tabular-nums text-[#37352f] font-medium">
+                    {viewCount === null
+                      ? "…"
+                      : `${viewCount.toLocaleString()} view${viewCount === 1 ? "" : "s"}`}
+                  </span>
+                </p>
+              )}
             </div>
             {report.summary && (
               <p className="text-[#37352f] leading-relaxed mb-6">{report.summary}</p>
@@ -543,8 +643,11 @@ const FeedbackPage = () => {
                   setViewByUrlError("");
                   const fetched = await getReportByURL(u);
                   setViewByUrlLoading(false);
-                  if (fetched) setReport(fetched);
-                  else setViewByUrlError("No review found for this URL.");
+                  if (fetched) {
+                    setReport(fetched.report);
+                    setViewCount(fetched.viewCount);
+                    setResolvedReviewId(fetched.reportId ?? null);
+                  } else setViewByUrlError("No review found for this URL.");
                 }}
                 className="px-4 py-2 bg-[#f97316] text-white rounded-md hover:bg-[#ea580c] disabled:opacity-50 text-sm font-medium"
               >

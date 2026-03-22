@@ -14,15 +14,8 @@ export const FEATURED_REVIEWS_CACHE_TAG = "featured-reviews";
 type StoredDoc = {
   url: string;
   report: ReviewReport;
+  viewCount?: number;
 };
-
-function stableVisits(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) {
-    h = Math.imul(31, h) + id.charCodeAt(i);
-  }
-  return 5200 + (Math.abs(h) % 11500);
-}
 
 async function loadFeaturedReviewItemsFromFirestore(): Promise<FeaturedCarouselItem[]> {
   const db = getReviewsFirestore();
@@ -41,13 +34,17 @@ async function loadFeaturedReviewItemsFromFirestore(): Promise<FeaturedCarouselI
       typeof report.title === "string" ? report.title : undefined,
       data.url
     );
+    const views =
+      typeof data.viewCount === "number" && Number.isFinite(data.viewCount)
+        ? Math.max(0, Math.floor(data.viewCount))
+        : 0;
     items.push({
       id: doc.id,
       url: data.url,
       name,
       summary: summaryForCarouselCard(report),
       summaryLong: summaryForGalleryCard(report),
-      visits: stableVisits(doc.id),
+      visits: views,
       valuation: "Sandbox",
     });
   });

@@ -124,7 +124,7 @@ export async function POST(request: Request) {
       report,
       lastAnalyzedDay: today,
       updatedAt: FieldValue.serverTimestamp(),
-      ...(snap.exists ? {} : { createdAt: FieldValue.serverTimestamp() }),
+      ...(snap.exists ? {} : { createdAt: FieldValue.serverTimestamp(), viewCount: 0 }),
     },
     { merge: true }
   );

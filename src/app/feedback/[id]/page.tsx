@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
+import { Poppins } from "next/font/google";
 import {
   ArrowLeft,
   ExternalLink,
@@ -35,6 +36,10 @@ const recordingViewLock = new Set<string>();
 /** Dedupes React Strict Mode double-mount and same-tick double effects (~2.5s). */
 const recentViewPostAt = new Map<string, number>();
 const VIEW_POST_DEDUP_MS = 2500;
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 const FeedbackPage = () => {
   const params = useParams();
@@ -201,7 +206,7 @@ const FeedbackPage = () => {
       }
 
       return (
-        <div className="min-h-screen bg-[#f7f6f3]">
+        <div className={`${poppins.className} min-h-screen bg-[#f7f6f3]`}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
             {dailyLimitNotice && (
               <p
@@ -270,7 +275,7 @@ const FeedbackPage = () => {
     // VC roast layout (sectioned)
     if (isVCRoast(report)) {
       return (
-        <div className="min-h-screen bg-[#f7f6f3]">
+        <div className={`${poppins.className} min-h-screen bg-[#f7f6f3]`}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
             {dailyLimitNotice && (
               <p

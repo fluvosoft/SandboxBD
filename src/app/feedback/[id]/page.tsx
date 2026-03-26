@@ -625,17 +625,19 @@ const FeedbackPage = () => {
             No report for this link
           </h2>
           <p className="text-[#787774] mb-6">
-            Submit your startup URL on the home page to get an AI-generated review, or paste a website URL below to view the latest stored review.
+            Submit your startup website or app store link on the home page to get an AI-generated review, or paste the same link below to view the latest stored review.
           </p>
           <div className="max-w-md mx-auto mb-6">
-            <label htmlFor="view-by-url" className="sr-only">Paste website URL to view latest review</label>
+            <label htmlFor="view-by-url" className="sr-only">
+              Paste website or app store URL to view latest review
+            </label>
             <div className="flex gap-2">
               <input
                 id="view-by-url"
                 type="text"
                 value={viewByUrlInput}
                 onChange={(e) => { setViewByUrlInput(e.target.value); setViewByUrlError(""); }}
-                placeholder="Paste website URL to view latest review"
+                placeholder="Paste website or Play / App Store URL…"
                 className="flex-1 px-4 py-2 border border-[rgba(55,53,47,0.16)] rounded-md text-sm"
               />
               <button

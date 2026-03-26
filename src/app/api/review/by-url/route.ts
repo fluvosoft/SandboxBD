@@ -6,6 +6,7 @@ import { clientIpFromRequest, rateLimit } from "@/lib/rate-limit";
 import {
   assertPublicWebsiteUrl,
   normalizeWebsiteUrl,
+  resolveReviewUrlInput,
   siteKeyFromCanonicalUrl,
 } from "@/lib/site-url";
 
@@ -39,7 +40,8 @@ export async function GET(request: Request) {
 
   let canonical: string;
   try {
-    canonical = normalizeWebsiteUrl(raw);
+    const expanded = await resolveReviewUrlInput(raw);
+    canonical = normalizeWebsiteUrl(expanded);
     assertPublicWebsiteUrl(canonical);
   } catch {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });

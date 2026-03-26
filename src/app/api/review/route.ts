@@ -9,6 +9,7 @@ import { clientIpFromRequest, rateLimit } from "@/lib/rate-limit";
 import {
   assertPublicWebsiteUrl,
   normalizeWebsiteUrl,
+  resolveReviewUrlInput,
   siteKeyFromCanonicalUrl,
   utcCalendarDay,
 } from "@/lib/site-url";
@@ -67,7 +68,8 @@ export async function POST(request: Request) {
 
   let canonical: string;
   try {
-    canonical = normalizeWebsiteUrl(rawUrl);
+    const expanded = await resolveReviewUrlInput(rawUrl);
+    canonical = normalizeWebsiteUrl(expanded);
     assertPublicWebsiteUrl(canonical);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Invalid URL";

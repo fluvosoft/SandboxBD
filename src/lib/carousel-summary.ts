@@ -1,6 +1,65 @@
 import type { ReviewReport } from "@/lib/api";
 import { sanitizeLetterPlainText } from "@/lib/letter-format";
 
+/**
+ * Removes generic opener lines so carousel/gallery blurbs show startup-specific
+ * substance (letters often share the same greeting).
+ */
+function stripLeadingLetterBoilerplate(oneLine: string): string {
+  let t = oneLine.trim();
+  const headPatterns: RegExp[] = [
+    /^Hello,\s*/i,
+    /^Hi there,\s*/i,
+    /^Dear\s+[^,\n]{1,120},\s*/i,
+    /^I hope this message finds you well\.?\s*/i,
+    /^I hope you are well\.?\s*/i,
+    /^I've taken a close look at [^.]+\.\s*/i,
+    /^After reviewing your website[^.]*\.\s*/i,
+    /^After reviewing your website and the[^.]*\.\s*/i,
+    /^I've reviewed [^.]+\.\s*/i,
+    /^I took a close look at [^.]+\.\s*/i,
+    /^Thank you for reaching out\.?\s*/i,
+  ];
+  for (let i = 0; i < 20; i++) {
+    const before = t;
+    for (const re of headPatterns) {
+      t = t.replace(re, "").trim();
+    }
+    if (t === before) break;
+  }
+  return t;
+}
+
+function isLikelyFluffSentence(sentence: string): boolean {
+  const s = sentence.trim();
+  if (s.length < 3) return true;
+  return /^(Hello,|Hi there,|Dear\s|I hope this message|I hope you are well|I've taken a close look|I took a close look|After reviewing your website|I've reviewed|Thank you for reaching out)/i.test(
+    s
+  );
+}
+
+/** Prefer substantive sentences when the opener strip leaves too little. */
+function letterExcerptForCard(plainOneLine: string, maxLen: number): string {
+  const collapsed = plainOneLine.replace(/\s+/g, " ").trim();
+  const stripped = stripLeadingLetterBoilerplate(collapsed);
+  if (stripped.length >= 40) {
+    return truncateWords(stripped, maxLen);
+  }
+  const sentences = collapsed
+    .split(/(?<=[.!?])\s+/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+  const kept = sentences.filter((s) => !isLikelyFluffSentence(s));
+  const joined = kept.join(" ").trim();
+  if (joined.length >= 40) {
+    return truncateWords(joined, maxLen);
+  }
+  if (stripped.length > 0) {
+    return truncateWords(stripped, maxLen);
+  }
+  return truncateWords(collapsed, maxLen);
+}
+
 function truncateWords(text: string, maxLen: number): string {
   const t = text.replace(/\s+/g, " ").trim();
   if (t.length <= maxLen) return t;
@@ -15,7 +74,7 @@ function truncateWords(text: string, maxLen: number): string {
 export function summaryFromReport(report: ReviewReport, maxLen: number): string {
   if (report.letter?.trim()) {
     const t = sanitizeLetterPlainText(report.letter).replace(/\s+/g, " ").trim();
-    return truncateWords(t, maxLen);
+    return letterExcerptForCard(t, maxLen);
   }
   if (report.summary?.trim()) {
     return truncateWords(report.summary, maxLen);

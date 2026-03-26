@@ -6,6 +6,20 @@ import { normalizeReportTitle } from "@/lib/report-title";
 const FETCH_TIMEOUT_MS = 9_000;
 const MAX_SNIPPET_CHARS = 4_000;
 
+const CHROME_LIKE_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+function classifyReviewTarget(canonicalUrl: string): "website" | "google_play" | "apple_app_store" {
+  try {
+    const h = new URL(canonicalUrl).hostname.toLowerCase();
+    if (h === "play.google.com") return "google_play";
+    if (h === "apps.apple.com" || h === "itunes.apple.com") return "apple_app_store";
+  } catch {
+    /* ignore */
+  }
+  return "website";
+}
+
 function decodeHtmlEntities(input: string): string {
   return input
     .replace(/&nbsp;/gi, " ")
@@ -36,7 +50,8 @@ function stripHtmlForSnippet(html: string): string {
   );
 }
 
-type WebsiteSignals = {
+type PageSignals = {
+  kind: "website" | "google_play" | "apple_app_store";
   finalUrl: string;
   title: string;
   metaDescription: string;
@@ -46,7 +61,8 @@ type WebsiteSignals = {
   snippet: string;
 };
 
-async function fetchWebsiteSignals(canonicalUrl: string): Promise<WebsiteSignals | null> {
+async function fetchPageSignals(canonicalUrl: string): Promise<PageSignals | null> {
+  const kind = classifyReviewTarget(canonicalUrl);
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -55,15 +71,19 @@ async function fetchWebsiteSignals(canonicalUrl: string): Promise<WebsiteSignals
       redirect: "follow",
       signal: ac.signal,
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; SandboxReviewBot/1.0; +https://sandboxbd.com)",
-        Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+        "User-Agent": CHROME_LIKE_UA,
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
       },
     });
     if (!res.ok) return null;
     const ct = (res.headers.get("content-type") || "").toLowerCase();
-    if (!ct.includes("text/html")) return null;
+    if (ct && !ct.includes("text/html") && !ct.includes("application/xhtml")) {
+      return null;
+    }
     const html = await res.text();
+    if (!html.trim().startsWith("<")) return null;
     const title = pickFirstMatch(html, /<title[^>]*>([\s\S]*?)<\/title>/i);
     const metaDescription = pickFirstMatch(
       html,
@@ -84,6 +104,7 @@ async function fetchWebsiteSignals(canonicalUrl: string): Promise<WebsiteSignals
     const snippet = stripHtmlForSnippet(html).slice(0, MAX_SNIPPET_CHARS);
 
     return {
+      kind,
       finalUrl: res.url || canonicalUrl,
       title,
       metaDescription,
@@ -99,22 +120,26 @@ async function fetchWebsiteSignals(canonicalUrl: string): Promise<WebsiteSignals
   }
 }
 
-const SYSTEM = `You are an experienced angel investor writing a candid but professional memo to a founder.
+const SYSTEM = `You are part of an experienced investment-style review team writing a candid but professional memo to a founder.
+
+Voice (required): Write the entire letter in first-person plural only, as the SANDBOX review team. Use "we", "us", and "our" for all reviewer statements (e.g. "we reviewed", "we think", "our read is"). Do not use "I", "me", or "my" for the reviewer. Hypotheticals or quoted third parties may use other wording when natural.
 
 You will receive:
-1) A canonical startup URL.
-2) Optional homepage evidence (title/meta/H1/snippet) fetched server-side.
+1) A canonical URL (startup website, or Google Play / Apple App Store listing).
+2) Optional page evidence (title/meta/H1/snippet) fetched server-side from that URL.
+
+When the target is a mobile app store listing, review it as a product and business (positioning, category, ratings narrative in text if visible, monetization hints, competitive context from description). You still cannot install the app; be explicit about limits of URL-only review.
 
 Use available evidence when present. If evidence is missing or weak, say exactly what is inferred vs what is uncertain.
 
-Write one cohesive professional email-style letter (like an investor or advisor email): clear paragraphs, no lists styled with asterisks or hashes, no markdown of any kind. Do not use asterisks, underscores for emphasis, hash headings (#), or backticks. For section transitions, use short plain-text lines in Title Case on their own line.
+Write one cohesive professional email-style letter (like an investor or advisor email): clear paragraphs, no lists styled with asterisks or hashes, no markdown of any kind. Do not use asterisks, underscores for emphasis, hash headings (#), or backticks. For section transitions, use short plain-text lines in Title Case on their own line. Keep the "we" voice throughout the body after the greeting.
 
 The review must be materially insightful and specific, not generic. Cover these founder-critical lenses:
 - Positioning clarity and ICP precision
 - Product wedge and differentiation durability
 - Go-to-market channel fit and distribution risk
 - Business model and pricing viability
-- Operational/technical trust signals from the site experience
+- Operational/technical trust signals from the website or store listing (messaging, polish, credibility)
 - Top 3 likely failure modes over 24-36 months
 - Prioritized fixes: what to do in 30 days, then 90 days
 
@@ -126,7 +151,7 @@ Respond with a single JSON object only (no markdown fences), matching this shape
 {
   "url": string (echo the canonical URL given),
   "title": string (the inferred company or product brand name only: 1-5 words, Title Case or natural brand casing, e.g. "Notion", "Linear", "Acme Labs". Do NOT use the raw domain, do NOT use questions, do NOT write "Thoughts on…" or "Feedback on…". Only the name you infer from the URL),
-  "letter": string (full plain-text body only: include greeting such as "Hello," or "Hi there," body paragraphs, and a professional sign-off such as "Best regards," then a closing line like "- Sandbox Review")
+  "letter": string (full plain-text body only: include greeting such as "Hello," or "Hi there," then body paragraphs in "we" voice, and a professional sign-off such as "Best regards," then a closing line like "- Sandbox Review")
 }`;
 
 export async function generateStartupRoastReport(
@@ -138,10 +163,10 @@ export async function generateStartupRoastReport(
   }
   const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
   const client = new OpenAI({ apiKey: key });
-  const websiteSignals = await fetchWebsiteSignals(canonicalUrl);
-  const evidenceBlock = websiteSignals
-    ? JSON.stringify(websiteSignals)
-    : "No homepage evidence could be fetched (timeout, blocked, non-HTML, or fetch failed).";
+  const pageSignals = await fetchPageSignals(canonicalUrl);
+  const evidenceBlock = pageSignals
+    ? JSON.stringify(pageSignals)
+    : "No page evidence could be fetched (timeout, blocked, non-HTML, or fetch failed).";
 
   const completion = await client.chat.completions.create({
     model,
@@ -152,7 +177,7 @@ export async function generateStartupRoastReport(
       { role: "system", content: SYSTEM },
       {
         role: "user",
-        content: `Canonical website URL to critique:\n${canonicalUrl}\n\nHomepage evidence (JSON):\n${evidenceBlock}`,
+        content: `Canonical URL to critique:\n${canonicalUrl}\n\nPage evidence (JSON):\n${evidenceBlock}`,
       },
     ],
   });

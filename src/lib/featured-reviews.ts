@@ -53,7 +53,7 @@ async function loadFeaturedReviewItemsFromFirestore(): Promise<FeaturedCarouselI
 
 const getCachedFeaturedReviewItems = unstable_cache(
   async () => loadFeaturedReviewItemsFromFirestore(),
-  ["featured-review-items-v1"],
+  ["featured-review-items-v2"],
   {
     revalidate: FEATURED_REVALIDATE_SECONDS,
     tags: [FEATURED_REVIEWS_CACHE_TAG],

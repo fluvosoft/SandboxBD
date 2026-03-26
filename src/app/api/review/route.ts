@@ -4,7 +4,10 @@ import { FieldValue } from "firebase-admin/firestore";
 import type { ReviewReport } from "@/lib/api";
 import { FEATURED_REVIEWS_CACHE_TAG } from "@/lib/featured-reviews";
 import { getReviewsFirestore, REVIEWS_COLLECTION } from "@/lib/firebase-admin";
-import { generateStartupRoastReport } from "@/lib/openai-review";
+import {
+  assessReviewEligibility,
+  generateStartupRoastReport,
+} from "@/lib/openai-review";
 import { clientIpFromRequest, rateLimit } from "@/lib/rate-limit";
 import {
   assertPublicWebsiteUrl,
@@ -74,6 +77,16 @@ export async function POST(request: Request) {
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Invalid URL";
     return NextResponse.json({ ok: false, error: msg }, { status: 400 });
+  }
+
+  const eligibility = await assessReviewEligibility(canonical);
+  if (!eligibility.allowed) {
+    return NextResponse.json(
+      { ok: false, error: eligibility.message },
+      {
+        status: 400,
+      }
+    );
   }
 
   const reportId = siteKeyFromCanonicalUrl(canonical);

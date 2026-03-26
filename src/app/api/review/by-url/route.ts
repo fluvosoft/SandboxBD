@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ReviewReport } from "@/lib/api";
 import { getReviewsFirestore, REVIEWS_COLLECTION } from "@/lib/firebase-admin";
+import { assessReviewEligibility } from "@/lib/openai-review";
 import { reportWithNormalizedTitle } from "@/lib/report-title";
 import { clientIpFromRequest, rateLimit } from "@/lib/rate-limit";
 import {
@@ -45,6 +46,11 @@ export async function GET(request: Request) {
     assertPublicWebsiteUrl(canonical);
   } catch {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+  }
+
+  const eligibility = await assessReviewEligibility(canonical);
+  if (!eligibility.allowed) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   const id = siteKeyFromCanonicalUrl(canonical);

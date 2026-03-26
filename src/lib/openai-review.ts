@@ -120,6 +120,101 @@ async function fetchPageSignals(canonicalUrl: string): Promise<PageSignals | nul
   }
 }
 
+type ReviewEligibility =
+  | { allowed: true }
+  | { allowed: false; message: string; category?: string };
+
+const ELIGIBILITY_SYSTEM = `You are a strict gatekeeper for SANDBOX startup reviews.
+
+Task:
+Given a canonical URL and optional page evidence, decide whether the URL is eligible for startup review.
+
+Allow only:
+- startup/company official websites
+- official Google Play app listing URLs
+- official Apple App Store listing URLs
+
+Reject:
+- personal portfolio/CV/resume/profile sites
+- social media profiles/channels/pages
+- university/college/school/club/community organization pages
+- documentation-only pages, generic blogs, and media channels that are not startup/company primary sites
+- government/nonprofit/institutional pages not representing a startup/company product
+
+Output JSON ONLY:
+{
+  "allowed": boolean,
+  "category": "startup_company" | "app_store_listing" | "personal_portfolio" | "social_profile" | "education_or_club" | "institutional_non_startup" | "other_non_startup",
+  "message": string
+}
+
+Rules:
+- If uncertain, reject conservatively when strong non-startup signals are present.
+- Keep message short, user-facing, and polite.
+- Never include markdown.`;
+
+function defaultEligibilityRejectMessage(): string {
+  return "This link looks outside SANDBOX scope. Please submit a startup/company official website or an official Google Play/App Store listing.";
+}
+
+export async function assessReviewEligibility(
+  canonicalUrl: string
+): Promise<ReviewEligibility> {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return { allowed: true };
+
+  const pageSignals = await fetchPageSignals(canonicalUrl);
+  const evidenceBlock = pageSignals
+    ? JSON.stringify(pageSignals)
+    : "No page evidence could be fetched.";
+
+  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const client = new OpenAI({ apiKey: key });
+
+  try {
+    const completion = await client.chat.completions.create({
+      model,
+      temperature: 0,
+      max_tokens: 300,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: ELIGIBILITY_SYSTEM },
+        {
+          role: "user",
+          content: `Canonical URL:\n${canonicalUrl}\n\nPage evidence (JSON):\n${evidenceBlock}`,
+        },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content?.trim();
+    if (!raw) return { allowed: true };
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return { allowed: true };
+    }
+
+    if (!parsed || typeof parsed !== "object") return { allowed: true };
+    const o = parsed as Record<string, unknown>;
+    const allowed = o.allowed === true;
+    if (allowed) return { allowed: true };
+
+    const message =
+      typeof o.message === "string" && o.message.trim()
+        ? o.message.trim()
+        : defaultEligibilityRejectMessage();
+    const category =
+      typeof o.category === "string" && o.category.trim()
+        ? o.category.trim()
+        : undefined;
+    return { allowed: false, message, category };
+  } catch {
+    return { allowed: true };
+  }
+}
+
 const SYSTEM = `You are part of an experienced investment-style review team writing a candid but professional memo to a founder.
 
 Voice (required): Write the entire letter in first-person plural only, as the SANDBOX review team. Use "we", "us", and "our" for all reviewer statements (e.g. "we reviewed", "we think", "our read is"). Do not use "I", "me", or "my" for the reviewer. Hypotheticals or quoted third parties may use other wording when natural.

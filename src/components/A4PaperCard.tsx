@@ -26,8 +26,6 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
   return (
     <article
       className="w-full max-w-[210mm] bg-white border border-[rgba(55,53,47,0.16)] rounded-md p-6 sm:p-8 md:p-12 flex flex-col hover:shadow-lg transition-all h-full min-h-0"
-      itemScope
-      itemType="https://schema.org/Organization"
     >
       {/* Header Section */}
       <header className="shrink-0 flex items-start gap-4 sm:gap-6 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-[rgba(55,53,47,0.09)]">
@@ -60,7 +58,6 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 sm:gap-2 text-[#f97316] hover:text-[#ea580c] text-xs sm:text-sm font-normal transition-colors"
-              itemProp="url"
               aria-label={`Visit ${name} website`}
             >
               Visit Website
@@ -89,7 +86,6 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
         </h3>
         <p
           className="text-sm sm:text-base text-[#37352f] leading-relaxed wrap-break-word"
-          itemProp="description"
         >
           {summary}
         </p>

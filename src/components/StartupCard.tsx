@@ -8,6 +8,8 @@ type StartupCardProps = {
   summary: string;
   visits: number;
   valuation: string;
+  /** Sand Score 0–100; shown in brand orange when set */
+  sandScore?: number;
   /** When set, the whole card links to this path (e.g. `/feedback/{id}`). */
   href?: string;
 };
@@ -18,6 +20,7 @@ const StartupCard: React.FC<StartupCardProps> = ({
   summary,
   visits,
   valuation,
+  sandScore,
   href,
 }) => {
   const inner = (
@@ -49,16 +52,36 @@ const StartupCard: React.FC<StartupCardProps> = ({
       <p className="text-[#787774] text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 leading-relaxed">{summary}</p>
 
       {/* Stats */}
-      <dl className="flex items-center justify-between pt-3 sm:pt-4 border-t border-[rgba(55,53,47,0.09)]">
-        <div className="flex flex-col">
-            <dt className="text-xs text-[#9b9a97]">Views</dt>
-          <dd className="text-xs sm:text-sm font-medium text-[#37352f]">
+      <dl
+        className={
+          typeof sandScore === "number"
+            ? "grid grid-cols-3 gap-2 pt-3 sm:pt-4 border-t border-[rgba(55,53,47,0.09)]"
+            : "flex items-center justify-between pt-3 sm:pt-4 border-t border-[rgba(55,53,47,0.09)]"
+        }
+      >
+        <div className="flex flex-col min-w-0">
+          <dt className="text-xs text-[#9b9a97]">Views</dt>
+          <dd className="text-xs sm:text-sm font-medium text-[#37352f] truncate">
             {visits.toLocaleString()}
           </dd>
         </div>
-        <div className="flex flex-col items-end">
+        {typeof sandScore === "number" && (
+          <div className="flex flex-col items-center min-w-0 text-center">
+            <dt className="text-xs text-[#9b9a97]">Sand Score</dt>
+            <dd className="text-xs sm:text-sm font-semibold text-[#f97316] tabular-nums">
+              {sandScore}
+            </dd>
+          </div>
+        )}
+        <div
+          className={
+            typeof sandScore === "number"
+              ? "flex flex-col items-end min-w-0"
+              : "flex flex-col items-end"
+          }
+        >
           <dt className="text-xs text-[#9b9a97]">Valuation</dt>
-          <dd className="text-xs sm:text-sm font-medium text-[#37352f]">{valuation}</dd>
+          <dd className="text-xs sm:text-sm font-medium text-[#37352f] truncate">{valuation}</dd>
         </div>
       </dl>
     </article>

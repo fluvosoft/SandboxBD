@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import type { ReviewReport } from "@/lib/api";
 import { getReviewsFirestore, REVIEWS_COLLECTION } from "@/lib/firebase-admin";
+import { assessReviewEligibility } from "@/lib/openai-review";
 import { reportWithNormalizedTitle } from "@/lib/report-title";
 import { clientIpFromRequest, rateLimit } from "@/lib/rate-limit";
 import {
   assertPublicWebsiteUrl,
   normalizeWebsiteUrl,
+  resolveReviewUrlInput,
   siteKeyFromCanonicalUrl,
 } from "@/lib/site-url";
 
@@ -39,10 +41,16 @@ export async function GET(request: Request) {
 
   let canonical: string;
   try {
-    canonical = normalizeWebsiteUrl(raw);
+    const expanded = await resolveReviewUrlInput(raw);
+    canonical = normalizeWebsiteUrl(expanded);
     assertPublicWebsiteUrl(canonical);
   } catch {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+  }
+
+  const eligibility = await assessReviewEligibility(canonical);
+  if (!eligibility.allowed) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   const id = siteKeyFromCanonicalUrl(canonical);

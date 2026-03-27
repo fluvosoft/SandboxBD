@@ -12,6 +12,8 @@ type A4PaperCardProps = {
   websiteUrl: string;
   /** Internal link to SANDBOX feedback when this row is from Firestore. */
   feedbackHref?: string;
+  /** Sand Score 0–100; shown in brand orange when set */
+  sandScore?: number;
 };
 
 const A4PaperCard: React.FC<A4PaperCardProps> = ({
@@ -22,12 +24,11 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
   valuation,
   websiteUrl,
   feedbackHref,
+  sandScore,
 }) => {
   return (
     <article
       className="w-full max-w-[210mm] bg-white border border-[rgba(55,53,47,0.16)] rounded-md p-6 sm:p-8 md:p-12 flex flex-col hover:shadow-lg transition-all h-full min-h-0"
-      itemScope
-      itemType="https://schema.org/Organization"
     >
       {/* Header Section */}
       <header className="shrink-0 flex items-start gap-4 sm:gap-6 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-[rgba(55,53,47,0.09)]">
@@ -60,7 +61,6 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 sm:gap-2 text-[#f97316] hover:text-[#ea580c] text-xs sm:text-sm font-normal transition-colors"
-              itemProp="url"
               aria-label={`Visit ${name} website`}
             >
               Visit Website
@@ -89,7 +89,6 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
         </h3>
         <p
           className="text-sm sm:text-base text-[#37352f] leading-relaxed wrap-break-word"
-          itemProp="description"
         >
           {summary}
         </p>
@@ -100,7 +99,13 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
 
       {/* Stats Section */}
       <div className="shrink-0 pt-4 sm:pt-6 border-t border-[rgba(55,53,47,0.09)]">
-        <dl className="grid grid-cols-2 gap-4 sm:gap-6">
+        <dl
+          className={
+            typeof sandScore === "number"
+              ? "grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"
+              : "grid grid-cols-2 gap-4 sm:gap-6"
+          }
+        >
           <div>
             <dt className="text-xs font-medium text-[#9b9a97] uppercase tracking-wide mb-1.5 sm:mb-2">
               Total views
@@ -109,6 +114,16 @@ const A4PaperCard: React.FC<A4PaperCardProps> = ({
               {visits.toLocaleString()}
             </dd>
           </div>
+          {typeof sandScore === "number" && (
+            <div>
+              <dt className="text-xs font-medium text-[#9b9a97] uppercase tracking-wide mb-1.5 sm:mb-2">
+                Sand Score
+              </dt>
+              <dd className="text-xl sm:text-2xl font-semibold text-[#f97316] tabular-nums">
+                {sandScore}
+              </dd>
+            </div>
+          )}
           <div>
             <dt className="text-xs font-medium text-[#9b9a97] uppercase tracking-wide mb-1.5 sm:mb-2">
               Valuation

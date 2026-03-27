@@ -8,6 +8,24 @@ export interface ReviewReport {
   title?: string;
   /** Open letter: single long-form investor letter (new format) */
   letter?: string;
+  /** Sand Score scorecard (0-100) */
+  sand_score?: number;
+  sand_band?: "High Risk" | "Needs Work" | "Promising" | "Strong";
+  sand_pillars?: {
+    positioning_icp: number;
+    wedge_moat: number;
+    gtm_distribution: number;
+    pricing_business_model: number;
+    trust_ux: number;
+  };
+  sand_summary?: string;
+  sand_rationales?: {
+    positioning_icp: string;
+    wedge_moat: string;
+    gtm_distribution: string;
+    pricing_business_model: string;
+    trust_ux: string;
+  };
   // VC roast structure (sectioned format)
   startup_claim?: string;
   what_it_actually_looks_like?: string;
@@ -91,6 +109,8 @@ export interface FeaturedCarouselItem {
   summaryLong: string;
   visits: number;
   valuation: string;
+  /** Sand Score 0–100 when the stored report includes it */
+  sandScore?: number;
 }
 
 /** In-memory cache so repeat visits / remounts don’t hammer `/api/review/featured`. */

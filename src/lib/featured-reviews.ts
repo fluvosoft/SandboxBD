@@ -4,6 +4,12 @@ import { summaryForCarouselCard, summaryForGalleryCard } from "@/lib/carousel-su
 import { getReviewsFirestore, REVIEWS_COLLECTION } from "@/lib/firebase-admin";
 import { normalizeReportTitle } from "@/lib/report-title";
 
+function sandScoreFromReport(report: ReviewReport): number | undefined {
+  const s = report.sand_score;
+  if (typeof s !== "number" || !Number.isFinite(s)) return undefined;
+  return Math.round(Math.max(0, Math.min(100, s)));
+}
+
 const LIMIT = 32;
 
 /** How long the server data cache is valid if not invalidated (seconds). */
@@ -38,6 +44,7 @@ async function loadFeaturedReviewItemsFromFirestore(): Promise<FeaturedCarouselI
       typeof data.viewCount === "number" && Number.isFinite(data.viewCount)
         ? Math.max(0, Math.floor(data.viewCount))
         : 0;
+    const sandScore = sandScoreFromReport(report);
     items.push({
       id: doc.id,
       url: data.url,
@@ -46,6 +53,7 @@ async function loadFeaturedReviewItemsFromFirestore(): Promise<FeaturedCarouselI
       summaryLong: summaryForGalleryCard(report),
       visits: views,
       valuation: "Sandbox",
+      ...(sandScore !== undefined ? { sandScore } : {}),
     });
   });
   return items;
@@ -53,7 +61,7 @@ async function loadFeaturedReviewItemsFromFirestore(): Promise<FeaturedCarouselI
 
 const getCachedFeaturedReviewItems = unstable_cache(
   async () => loadFeaturedReviewItemsFromFirestore(),
-  ["featured-review-items-v1"],
+  ["featured-review-items-v3"],
   {
     revalidate: FEATURED_REVALIDATE_SECONDS,
     tags: [FEATURED_REVIEWS_CACHE_TAG],

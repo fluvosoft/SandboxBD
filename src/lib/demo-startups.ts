@@ -149,6 +149,7 @@ export type GalleryCardRow = {
   valuation: string;
   websiteUrl: string;
   feedbackHref?: string;
+  sandScore?: number;
 };
 
 export function mergeGalleryRows(
@@ -165,6 +166,7 @@ export function mergeGalleryRows(
     valuation: i.valuation,
     websiteUrl: i.url,
     feedbackHref: `/feedback/${i.id}`,
+    ...(typeof i.sandScore === "number" ? { sandScore: i.sandScore } : {}),
   }));
 
   const fromDemo: GalleryCardRow[] = demosFiltered.map((d, idx) => ({

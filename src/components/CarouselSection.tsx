@@ -22,6 +22,7 @@ type CarouselCard = {
   summary: string;
   visits: number;
   valuation: string;
+  sandScore?: number;
   href?: string;
 };
 
@@ -33,6 +34,7 @@ function liveToCard(item: FeaturedCarouselItem): CarouselCard {
     summary: item.summary,
     visits: item.visits,
     valuation: item.valuation,
+    ...(typeof item.sandScore === "number" ? { sandScore: item.sandScore } : {}),
     href: `/feedback/${item.id}`,
   };
 }
@@ -106,6 +108,7 @@ const CarouselSection: React.FC = () => {
               summary={c.summary}
               visits={c.visits}
               valuation={c.valuation}
+              sandScore={c.sandScore}
               href={c.href}
             />
           ))}
@@ -122,6 +125,7 @@ const CarouselSection: React.FC = () => {
               summary={c.summary}
               visits={c.visits}
               valuation={c.valuation}
+              sandScore={c.sandScore}
               href={c.href}
             />
           ))}

@@ -22,7 +22,7 @@ const HeroSection: React.FC = () => {
     setError("");
 
     if (!searchQuery.trim()) {
-      setError("Please enter a website URL");
+      setError("Please enter a website or app store link");
       return;
     }
 
@@ -78,7 +78,7 @@ const HeroSection: React.FC = () => {
         <form
           onSubmit={handleSubmit}
           className="max-w-2xl mx-auto px-2"
-          aria-label="Submit website for startup feedback"
+          aria-label="Submit website or app store link for startup feedback"
         >
           {/* Honeypot: leave empty; automated clients often fill hidden fields */}
           <input
@@ -93,7 +93,7 @@ const HeroSection: React.FC = () => {
           />
           <div className="relative">
             <label htmlFor="website-url-input" className="sr-only">
-              Enter your website URL to get feedback
+              Enter your website URL or Google Play / App Store link to get feedback
             </label>
             <input
               id="website-url-input"
@@ -103,8 +103,8 @@ const HeroSection: React.FC = () => {
                 setSearchQuery(e.target.value);
                 setError("");
               }}
-              placeholder="Enter your website URL..."
-              aria-label="Website URL"
+              placeholder="Website URL or Play Store / App Store link..."
+              aria-label="Website or app store URL"
               className={`w-full px-4 sm:px-5 py-3.5 sm:py-4 pr-12 sm:pr-14 text-sm sm:text-base bg-white border rounded-md text-[#37352f] placeholder-[#9b9a97] focus:outline-none focus:ring-2 transition-all shadow-sm ${
                 error
                   ? "border-red-500 focus:border-red-500 focus:ring-[rgba(239,68,68,0.15)]"
@@ -115,7 +115,7 @@ const HeroSection: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              aria-label="Submit website URL for feedback"
+              aria-label="Submit link for feedback"
               className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#37352f] text-white rounded-md hover:bg-[#2e2d29] transition-colors focus:outline-none focus:ring-2 focus:ring-[rgba(55,53,47,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
@@ -131,7 +131,7 @@ const HeroSection: React.FC = () => {
             </p>
           )}
           <p id="search-description" className="sr-only">
-            Enter your startup website URL to receive an honest feedback report
+            Enter your startup website or mobile app store listing URL to receive an honest feedback report
           </p>
           <p className="mt-4 text-center text-sm text-[#787774]">
             Already have a review?{" "}

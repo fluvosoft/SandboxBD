@@ -224,6 +224,32 @@ const FeedbackPage = () => {
               Back to home
             </Link>
 
+            {typeof report.sand_score === "number" && report.sand_pillars && (
+              <section className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-4 sm:p-5 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                  <h2 className="text-sm sm:text-base font-semibold text-[#37352f]">
+                    Sand Score
+                  </h2>
+                  <div className="inline-flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-md bg-[rgba(249,115,22,0.14)] text-[#ea580c] text-xs font-semibold">
+                      {report.sand_band || "Score"}
+                    </span>
+                    <span className="tabular-nums text-lg sm:text-xl font-semibold text-[#37352f]">
+                      {report.sand_score}/100
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-[#787774] mb-3">{report.sand_summary}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-[#37352f]">
+                  <p>Positioning & ICP: {report.sand_pillars.positioning_icp}/10</p>
+                  <p>Wedge & Moat: {report.sand_pillars.wedge_moat}/10</p>
+                  <p>GTM & Distribution: {report.sand_pillars.gtm_distribution}/10</p>
+                  <p>Pricing & Model: {report.sand_pillars.pricing_business_model}/10</p>
+                  <p>Trust & UX: {report.sand_pillars.trust_ux}/10</p>
+                </div>
+              </section>
+            )}
+
             <article
               className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] overflow-hidden"
               aria-label="Review letter"
@@ -319,6 +345,30 @@ const FeedbackPage = () => {
                 )}
               </div>
             </div>
+
+            {typeof report.sand_score === "number" && report.sand_pillars && (
+              <section className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                  <h2 className="text-lg font-semibold text-[#37352f]">Sand Score</h2>
+                  <div className="inline-flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-md bg-[rgba(249,115,22,0.14)] text-[#ea580c] text-xs font-semibold">
+                      {report.sand_band || "Score"}
+                    </span>
+                    <span className="tabular-nums text-xl font-semibold text-[#37352f]">
+                      {report.sand_score}/100
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-[#787774] mb-4">{report.sand_summary}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-sm text-[#37352f]">
+                  <p>Positioning & ICP: {report.sand_pillars.positioning_icp}/10</p>
+                  <p>Wedge & Moat: {report.sand_pillars.wedge_moat}/10</p>
+                  <p>GTM & Distribution: {report.sand_pillars.gtm_distribution}/10</p>
+                  <p>Pricing & Model: {report.sand_pillars.pricing_business_model}/10</p>
+                  <p>Trust & UX: {report.sand_pillars.trust_ux}/10</p>
+                </div>
+              </section>
+            )}
 
             {report.startup_claim && (
               <div className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 mb-6">
@@ -625,17 +675,19 @@ const FeedbackPage = () => {
             No report for this link
           </h2>
           <p className="text-[#787774] mb-6">
-            Submit your startup URL on the home page to get an AI-generated review, or paste a website URL below to view the latest stored review.
+            Submit your startup website or app store link on the home page to get an AI-generated review, or paste the same link below to view the latest stored review.
           </p>
           <div className="max-w-md mx-auto mb-6">
-            <label htmlFor="view-by-url" className="sr-only">Paste website URL to view latest review</label>
+            <label htmlFor="view-by-url" className="sr-only">
+              Paste website or app store URL to view latest review
+            </label>
             <div className="flex gap-2">
               <input
                 id="view-by-url"
                 type="text"
                 value={viewByUrlInput}
                 onChange={(e) => { setViewByUrlInput(e.target.value); setViewByUrlError(""); }}
-                placeholder="Paste website URL to view latest review"
+                placeholder="Paste website or Play / App Store URL…"
                 className="flex-1 px-4 py-2 border border-[rgba(55,53,47,0.16)] rounded-md text-sm"
               />
               <button

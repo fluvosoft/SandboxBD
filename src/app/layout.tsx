@@ -3,6 +3,7 @@ import { Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import ConditionalAnnouncementBar from "@/components/ConditionalAnnouncementBar";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
+import SandScoreAnnouncementModal from "@/components/SandScoreAnnouncementModal";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import FirebaseAnalytics from "@/components/FirebaseAnalytics";
 import { getSiteUrl } from "@/lib/site-url";
@@ -165,6 +166,7 @@ export default function RootLayout({
       >
         <ConditionalAnnouncementBar />
         <ConditionalNavbar />
+        <SandScoreAnnouncementModal />
         {children}
         <VercelAnalytics />
         <FirebaseAnalytics />

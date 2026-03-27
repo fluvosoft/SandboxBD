@@ -7,6 +7,8 @@ import { Poppins } from "next/font/google";
 import {
   ArrowLeft,
   ExternalLink,
+  Copy,
+  Check,
   ThumbsUp,
   ThumbsDown,
   TrendingUp,
@@ -30,6 +32,7 @@ import {
   type ReviewReport,
 } from "@/lib/api";
 import { sanitizeLetterPlainText } from "@/lib/letter-format";
+import SandScore from "@/components/SandScore";
 
 /** Prevents duplicate view POSTs when React Strict Mode runs effects twice (dev). */
 const recordingViewLock = new Set<string>();
@@ -53,6 +56,20 @@ const FeedbackPage = () => {
   const [viewByUrlInput, setViewByUrlInput] = useState("");
   const [viewByUrlLoading, setViewByUrlLoading] = useState(false);
   const [viewByUrlError, setViewByUrlError] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+
+  const copyReviewText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setCopyFailed(false);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopyFailed(true);
+      window.setTimeout(() => setCopyFailed(false), 1800);
+    }
+  };
 
   useEffect(() => {
     setViewCount(null);
@@ -204,6 +221,7 @@ const FeedbackPage = () => {
       } catch {
         /* keep url */
       }
+      const reviewTextForCopy = `Startup: ${title}\nWebsite: ${report.url}\n\n${letterBody}`;
 
       return (
         <div className={`${poppins.className} min-h-screen bg-[#f7f6f3]`}>
@@ -225,36 +243,32 @@ const FeedbackPage = () => {
             </Link>
 
             {typeof report.sand_score === "number" && report.sand_pillars && (
-              <section className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-4 sm:p-5 mb-6">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                  <h2 className="text-sm sm:text-base font-semibold text-[#37352f]">
-                    Sand Score
-                  </h2>
-                  <div className="inline-flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-md bg-[rgba(249,115,22,0.14)] text-[#ea580c] text-xs font-semibold">
-                      {report.sand_band || "Score"}
-                    </span>
-                    <span className="tabular-nums text-lg sm:text-xl font-semibold text-[#37352f]">
-                      {report.sand_score}/100
-                    </span>
-                  </div>
-                </div>
-                <p className="text-sm text-[#787774] mb-3">{report.sand_summary}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-[#37352f]">
-                  <p>Positioning & ICP: {report.sand_pillars.positioning_icp}/10</p>
-                  <p>Wedge & Moat: {report.sand_pillars.wedge_moat}/10</p>
-                  <p>GTM & Distribution: {report.sand_pillars.gtm_distribution}/10</p>
-                  <p>Pricing & Model: {report.sand_pillars.pricing_business_model}/10</p>
-                  <p>Trust & UX: {report.sand_pillars.trust_ux}/10</p>
-                </div>
-              </section>
+              <div className="mb-6">
+                <SandScore
+                  sandScore={report.sand_score}
+                  band={report.sand_band || "Needs Work"}
+                  pillars={report.sand_pillars}
+                />
+                {report.sand_summary && (
+                  <p className="mt-3 px-1 text-sm text-[#787774]">{report.sand_summary}</p>
+                )}
+              </div>
             )}
 
             <article
               className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] overflow-hidden"
               aria-label="Review letter"
             >
-              <div className="border-b border-[rgba(55,53,47,0.09)] bg-[#fafafa] px-6 sm:px-8 py-4 sm:py-5 text-sm text-[#37352f] space-y-1.5">
+              <div className="relative border-b border-[rgba(55,53,47,0.09)] bg-[#fafafa] px-6 sm:px-8 py-4 sm:py-5 text-sm text-[#37352f] space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => void copyReviewText(reviewTextForCopy)}
+                  aria-label="Copy startup review"
+                  className="absolute top-4 right-4 inline-flex items-center justify-center w-8 h-8 rounded-md border border-[rgba(55,53,47,0.16)] bg-white text-[#787774] hover:text-[#37352f] hover:bg-[rgba(55,53,47,0.04)] transition-colors"
+                  title={copied ? "Copied" : "Copy startup review"}
+                >
+                  {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+                </button>
                 <div>
                   <span className="text-[#787774] w-20 inline-block">From</span>
                   <span className="font-medium">SANDBOX Review</span>
@@ -286,6 +300,14 @@ const FeedbackPage = () => {
                     </span>
                   </div>
                 )}
+                {(copied || copyFailed) && (
+                  <p
+                    className={`pt-1 text-xs ${copyFailed ? "text-[#dc2626]" : "text-[#16a34a]"}`}
+                    role="status"
+                  >
+                    {copyFailed ? "Copy failed. Please try again." : "Review copied."}
+                  </p>
+                )}
               </div>
               <div className="px-6 sm:px-8 py-8 sm:py-10">
                 <div className="text-[#37352f] text-[15px] leading-[1.75] whitespace-pre-wrap">
@@ -300,6 +322,36 @@ const FeedbackPage = () => {
 
     // VC roast layout (sectioned)
     if (isVCRoast(report)) {
+      const sectionsForCopy = [
+        report.startup_claim ? `Startup Claim:\n${report.startup_claim}` : "",
+        report.what_it_actually_looks_like
+          ? `What It Actually Looks Like:\n${report.what_it_actually_looks_like}`
+          : "",
+        report.the_roast ? `The Roast:\n${report.the_roast}` : "",
+        (report.red_flags?.length ?? 0) > 0
+          ? `Red Flags:\n${report.red_flags!.map((f) => `- ${f}`).join("\n")}`
+          : "",
+        report.product_reality_check
+          ? `Product Reality Check:\n${report.product_reality_check}`
+          : "",
+        report.business_model_reality_check
+          ? `Business Model Reality Check:\n${report.business_model_reality_check}`
+          : "",
+        (report.investor_rejection_reasons?.length ?? 0) > 0
+          ? `Investor Rejection Reasons:\n${report.investor_rejection_reasons!
+              .map((r) => `- ${r}`)
+              .join("\n")}`
+          : "",
+        (report.what_would_actually_fix_this?.length ?? 0) > 0
+          ? `What Would Actually Fix This:\n${report.what_would_actually_fix_this!
+              .map((w) => `- ${w}`)
+              .join("\n")}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+      const reviewTextForCopy = `Startup: ${title}\nWebsite: ${report.url}\n\n${sectionsForCopy}`;
+
       return (
         <div className={`${poppins.className} min-h-screen bg-[#f7f6f3]`}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -319,7 +371,16 @@ const FeedbackPage = () => {
               Back to home
             </Link>
 
-            <div className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 sm:p-8 mb-6">
+            <div className="relative bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 sm:p-8 mb-6">
+              <button
+                type="button"
+                onClick={() => void copyReviewText(reviewTextForCopy)}
+                aria-label="Copy startup review"
+                className="absolute top-5 right-5 inline-flex items-center justify-center w-9 h-9 rounded-md border border-[rgba(55,53,47,0.16)] bg-white text-[#787774] hover:text-[#37352f] hover:bg-[rgba(55,53,47,0.04)] transition-colors"
+                title={copied ? "Copied" : "Copy startup review"}
+              >
+                {copied ? <Check size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />}
+              </button>
               <div className="mb-6">
                 <h1 className="text-3xl sm:text-4xl font-semibold text-[#37352f] mb-2">
                   {title}
@@ -343,31 +404,28 @@ const FeedbackPage = () => {
                     </span>
                   </p>
                 )}
+                {(copied || copyFailed) && (
+                  <p
+                    className={`mt-2 text-xs ${copyFailed ? "text-[#dc2626]" : "text-[#16a34a]"}`}
+                    role="status"
+                  >
+                    {copyFailed ? "Copy failed. Please try again." : "Review copied."}
+                  </p>
+                )}
               </div>
             </div>
 
             {typeof report.sand_score === "number" && report.sand_pillars && (
-              <section className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 mb-6">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                  <h2 className="text-lg font-semibold text-[#37352f]">Sand Score</h2>
-                  <div className="inline-flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-md bg-[rgba(249,115,22,0.14)] text-[#ea580c] text-xs font-semibold">
-                      {report.sand_band || "Score"}
-                    </span>
-                    <span className="tabular-nums text-xl font-semibold text-[#37352f]">
-                      {report.sand_score}/100
-                    </span>
-                  </div>
-                </div>
-                <p className="text-sm text-[#787774] mb-4">{report.sand_summary}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-sm text-[#37352f]">
-                  <p>Positioning & ICP: {report.sand_pillars.positioning_icp}/10</p>
-                  <p>Wedge & Moat: {report.sand_pillars.wedge_moat}/10</p>
-                  <p>GTM & Distribution: {report.sand_pillars.gtm_distribution}/10</p>
-                  <p>Pricing & Model: {report.sand_pillars.pricing_business_model}/10</p>
-                  <p>Trust & UX: {report.sand_pillars.trust_ux}/10</p>
-                </div>
-              </section>
+              <div className="mb-6">
+                <SandScore
+                  sandScore={report.sand_score}
+                  band={report.sand_band || "Needs Work"}
+                  pillars={report.sand_pillars}
+                />
+                {report.sand_summary && (
+                  <p className="mt-3 px-1 text-sm text-[#787774]">{report.sand_summary}</p>
+                )}
+              </div>
             )}
 
             {report.startup_claim && (

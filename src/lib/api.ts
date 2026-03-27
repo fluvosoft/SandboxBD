@@ -1,7 +1,3 @@
-/**
- * Backend API client for the startup review service.
- * Base URL is set via NEXT_PUBLIC_API_URL (e.g. http://localhost:8080).
- */
 
 export interface ReviewReport {
   url: string;

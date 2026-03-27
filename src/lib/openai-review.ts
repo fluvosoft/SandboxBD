@@ -124,6 +124,29 @@ type ReviewEligibility =
   | { allowed: true }
   | { allowed: false; message: string; category?: string };
 
+type SandBand = "High Risk" | "Needs Work" | "Promising" | "Strong";
+type SandPillars = {
+  positioning_icp: number;
+  wedge_moat: number;
+  gtm_distribution: number;
+  pricing_business_model: number;
+  trust_ux: number;
+};
+type SandRationales = {
+  positioning_icp: string;
+  wedge_moat: string;
+  gtm_distribution: string;
+  pricing_business_model: string;
+  trust_ux: string;
+};
+type SandScorecard = {
+  sand_score: number;
+  band: SandBand;
+  pillars: SandPillars;
+  summary: string;
+  rationales: SandRationales;
+};
+
 const ELIGIBILITY_SYSTEM = `You are a strict gatekeeper for SANDBOX startup reviews.
 
 Task:
@@ -152,6 +175,172 @@ Rules:
 - If uncertain, reject conservatively when strong non-startup signals are present.
 - Keep message short, user-facing, and polite.
 - Never include markdown.`;
+
+const SCORECARD_SYSTEM = `You are an experienced early-stage startup evaluator creating a simple, transparent scorecard for founders.
+
+Your task:
+Given a startup's public information (URL, basic page evidence, and optionally a review letter), assign:
+1) 5 pillar scores from 0-10
+2) One overall "Sand Score" from 0-100
+3) A short rationale
+
+Scoring model:
+- You MUST use these exact 5 pillars, each scored as an integer 0-10:
+  - positioning_icp
+  - wedge_moat
+  - gtm_distribution
+  - pricing_business_model
+  - trust_ux
+
+- Compute the overall Sand Score (0-100) as a weighted sum of the 5 pillars:
+  - positioning_icp:        15%
+  - wedge_moat:             25%
+  - gtm_distribution:       25%
+  - pricing_business_model: 15%
+  - trust_ux:               20%
+
+- Formula (you must follow this exactly):
+  - base = 0.15 * positioning_icp
+        + 0.25 * wedge_moat
+        + 0.25 * gtm_distribution
+        + 0.15 * pricing_business_model
+        + 0.20 * trust_ux
+  - sand_score = round(10 * base)
+
+- Also assign a band label based on sand_score:
+  - 0-39 => "High Risk"
+  - 40-59 => "Needs Work"
+  - 60-79 => "Promising"
+  - 80-100 => "Strong"
+
+Evidence and uncertainty:
+- You ONLY see public information (URL + HTML snippet, meta tags, store listing text, and optionally a review letter).
+- NEVER invent hidden data such as revenue, users, MAU, churn, or funding.
+- If an area has weak evidence (for example, no pricing page), keep that pillar <= 5/10 and explicitly mention that information is missing.
+- When you infer something that is not explicit in the evidence, prefix it with "We infer that..." in the rationale.
+
+Output format:
+You MUST respond with a single JSON object only (no markdown, no extra text), matching exactly this shape:
+{
+  "sand_score": number,
+  "band": "High Risk" | "Needs Work" | "Promising" | "Strong",
+  "pillars": {
+    "positioning_icp": number,
+    "wedge_moat": number,
+    "gtm_distribution": number,
+    "pricing_business_model": number,
+    "trust_ux": number
+  },
+  "summary": string,
+  "rationales": {
+    "positioning_icp": string,
+    "wedge_moat": string,
+    "gtm_distribution": string,
+    "pricing_business_model": string,
+    "trust_ux": string
+  }
+}
+
+Style:
+- Be concise but specific.
+- Do not give advice here; just scoring + rationales.
+- No markdown, no bullet characters, no headings.
+
+If inputs are extremely weak or clearly not a startup/company/app, set all pillars to 0, sand_score = 0, band = "High Risk", and briefly explain in the summary.`;
+
+function clampInt(n: unknown, min: number, max: number): number {
+  const x = typeof n === "number" && Number.isFinite(n) ? Math.round(n) : min;
+  return Math.max(min, Math.min(max, x));
+}
+
+function normalizeBand(score: number): SandBand {
+  if (score <= 39) return "High Risk";
+  if (score <= 59) return "Needs Work";
+  if (score <= 79) return "Promising";
+  return "Strong";
+}
+
+function parseSandScorecard(raw: string): SandScorecard | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== "object") return null;
+  const o = parsed as Record<string, unknown>;
+  const p0 = (o.pillars as Record<string, unknown>) || {};
+  const r0 = (o.rationales as Record<string, unknown>) || {};
+  const pillars: SandPillars = {
+    positioning_icp: clampInt(p0.positioning_icp, 0, 10),
+    wedge_moat: clampInt(p0.wedge_moat, 0, 10),
+    gtm_distribution: clampInt(p0.gtm_distribution, 0, 10),
+    pricing_business_model: clampInt(p0.pricing_business_model, 0, 10),
+    trust_ux: clampInt(p0.trust_ux, 0, 10),
+  };
+  const base =
+    0.15 * pillars.positioning_icp +
+    0.25 * pillars.wedge_moat +
+    0.25 * pillars.gtm_distribution +
+    0.15 * pillars.pricing_business_model +
+    0.2 * pillars.trust_ux;
+  const sand_score = clampInt(Math.round(10 * base), 0, 100);
+  const band = normalizeBand(sand_score);
+  const summary =
+    typeof o.summary === "string" && o.summary.trim()
+      ? o.summary.trim()
+      : "Evidence-based startup scorecard generated from public information only.";
+  const txt = (v: unknown): string =>
+    typeof v === "string" && v.trim()
+      ? v.trim()
+      : "We infer that available public evidence is limited for this pillar.";
+  const rationales: SandRationales = {
+    positioning_icp: txt(r0.positioning_icp),
+    wedge_moat: txt(r0.wedge_moat),
+    gtm_distribution: txt(r0.gtm_distribution),
+    pricing_business_model: txt(r0.pricing_business_model),
+    trust_ux: txt(r0.trust_ux),
+  };
+  return { sand_score, band, pillars, summary, rationales };
+}
+
+async function generateSandScorecard(
+  client: OpenAI,
+  model: string,
+  canonicalUrl: string,
+  pageSignals: PageSignals | null,
+  reviewLetter?: string
+): Promise<SandScorecard | null> {
+  const evidence = pageSignals
+    ? JSON.stringify(pageSignals)
+    : "No page evidence could be fetched.";
+  const letterBlock = reviewLetter?.trim()
+    ? reviewLetter.trim().slice(0, 3500)
+    : "No review letter available.";
+  try {
+    const completion = await client.chat.completions.create({
+      model,
+      temperature: 0,
+      max_tokens: 1200,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: SCORECARD_SYSTEM },
+        {
+          role: "user",
+          content:
+            `Canonical URL:\n${canonicalUrl}\n\n` +
+            `Page evidence (JSON):\n${evidence}\n\n` +
+            `Optional review letter:\n${letterBlock}`,
+        },
+      ],
+    });
+    const raw = completion.choices[0]?.message?.content?.trim();
+    if (!raw) return null;
+    return parseSandScorecard(raw);
+  } catch {
+    return null;
+  }
+}
 
 function defaultEligibilityRejectMessage(): string {
   return "This link looks outside SANDBOX scope. Please submit a startup/company official website or an official Google Play/App Store listing.";
@@ -301,11 +490,27 @@ export async function generateStartupRoastReport(
 
   const rawTitle = typeof o.title === "string" ? o.title.trim() : "";
   const title = normalizeReportTitle(rawTitle || undefined, canonicalUrl);
+  const scorecard = await generateSandScorecard(
+    client,
+    model,
+    canonicalUrl,
+    pageSignals,
+    letter
+  );
 
   const report: ReviewReport = {
     url: canonicalUrl,
     title,
     letter,
+    ...(scorecard
+      ? {
+          sand_score: scorecard.sand_score,
+          sand_band: scorecard.band,
+          sand_pillars: scorecard.pillars,
+          sand_summary: scorecard.summary,
+          sand_rationales: scorecard.rationales,
+        }
+      : {}),
   };
   return report;
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import A4PaperCard from "@/components/A4PaperCard";
+import GalleryContent from "@/components/GalleryContent";
 import {
   DEMO_STARTUP_RECORDS,
   mergeGalleryRows,
@@ -79,19 +79,7 @@ const GalleryPage = async () => {
             </p>
           </header>
 
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 items-stretch">
-            {rows.map((row) => (
-              <A4PaperCard
-                key={row.key}
-                name={row.name}
-                summary={row.summary}
-                visits={row.visits}
-                valuation={row.valuation}
-                websiteUrl={row.websiteUrl}
-                feedbackHref={row.feedbackHref}
-              />
-            ))}
-          </section>
+          <GalleryContent rows={rows} />
         </div>
       </div>
     </>

@@ -224,6 +224,32 @@ const FeedbackPage = () => {
               Back to home
             </Link>
 
+            {typeof report.sand_score === "number" && report.sand_pillars && (
+              <section className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-4 sm:p-5 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                  <h2 className="text-sm sm:text-base font-semibold text-[#37352f]">
+                    Sand Score
+                  </h2>
+                  <div className="inline-flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-md bg-[rgba(249,115,22,0.14)] text-[#ea580c] text-xs font-semibold">
+                      {report.sand_band || "Score"}
+                    </span>
+                    <span className="tabular-nums text-lg sm:text-xl font-semibold text-[#37352f]">
+                      {report.sand_score}/100
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-[#787774] mb-3">{report.sand_summary}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-[#37352f]">
+                  <p>Positioning & ICP: {report.sand_pillars.positioning_icp}/10</p>
+                  <p>Wedge & Moat: {report.sand_pillars.wedge_moat}/10</p>
+                  <p>GTM & Distribution: {report.sand_pillars.gtm_distribution}/10</p>
+                  <p>Pricing & Model: {report.sand_pillars.pricing_business_model}/10</p>
+                  <p>Trust & UX: {report.sand_pillars.trust_ux}/10</p>
+                </div>
+              </section>
+            )}
+
             <article
               className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] overflow-hidden"
               aria-label="Review letter"
@@ -319,6 +345,30 @@ const FeedbackPage = () => {
                 )}
               </div>
             </div>
+
+            {typeof report.sand_score === "number" && report.sand_pillars && (
+              <section className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                  <h2 className="text-lg font-semibold text-[#37352f]">Sand Score</h2>
+                  <div className="inline-flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-md bg-[rgba(249,115,22,0.14)] text-[#ea580c] text-xs font-semibold">
+                      {report.sand_band || "Score"}
+                    </span>
+                    <span className="tabular-nums text-xl font-semibold text-[#37352f]">
+                      {report.sand_score}/100
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-[#787774] mb-4">{report.sand_summary}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-sm text-[#37352f]">
+                  <p>Positioning & ICP: {report.sand_pillars.positioning_icp}/10</p>
+                  <p>Wedge & Moat: {report.sand_pillars.wedge_moat}/10</p>
+                  <p>GTM & Distribution: {report.sand_pillars.gtm_distribution}/10</p>
+                  <p>Pricing & Model: {report.sand_pillars.pricing_business_model}/10</p>
+                  <p>Trust & UX: {report.sand_pillars.trust_ux}/10</p>
+                </div>
+              </section>
+            )}
 
             {report.startup_claim && (
               <div className="bg-white rounded-md shadow-sm border border-[rgba(55,53,47,0.16)] p-6 mb-6">

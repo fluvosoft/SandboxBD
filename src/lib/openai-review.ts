@@ -153,16 +153,21 @@ Task:
 Given a canonical URL and optional page evidence, decide whether the URL is eligible for startup review.
 
 Allow only:
-- startup/company official websites
+- startup/company official websites (including B2B/B2C software and product companies)
 - official Google Play app listing URLs
 - official Apple App Store listing URLs
+- commercial edtech / learning apps and test-prep products when the site is clearly the company marketing a software product (downloads, pricing, product features)
 
 Reject:
 - personal portfolio/CV/resume/profile sites
 - social media profiles/channels/pages
-- university/college/school/club/community organization pages
+- official pages for a school/university/club as an institution (not the vendor selling software to students)
 - documentation-only pages, generic blogs, and media channels that are not startup/company primary sites
 - government/nonprofit/institutional pages not representing a startup/company product
+
+Important distinction:
+- ALLOW consumer or B2B education technology companies (e.g. exam apps, course platforms) if they look like a product/company homepage.
+- REJECT only when the URL is primarily an institutional/academic org site, a generic community, or clearly not a company product site.
 
 Output JSON ONLY:
 {
@@ -172,7 +177,7 @@ Output JSON ONLY:
 }
 
 Rules:
-- If uncertain, reject conservatively when strong non-startup signals are present.
+- If uncertain, reject conservatively when strong non-startup signals are present—except do not treat "education sector" or "exam prep" alone as non-startup if the site is a commercial product company.
 - Keep message short, user-facing, and polite.
 - Never include markdown.`;
 
